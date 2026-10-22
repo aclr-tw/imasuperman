@@ -77,7 +77,11 @@ nav a {
   padding: 4px 12px; border-radius: 999px; background: var(--soft);
 }
 nav a:hover { background: var(--accent-soft); color: var(--accent-strong); }
+nav a.active { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+nav { scrollbar-width: none; }
+nav::-webkit-scrollbar { display: none; }
 a { color: var(--accent-strong); }
+.muted strong { color: var(--fg); font-weight: 700; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 section { padding-top: 40px; scroll-margin-top: 60px; display: grid; gap: 14px; }
@@ -249,6 +253,11 @@ details.mood .tip { font-size: 14px; border-top: 1px dashed #b1bbc9; padding-top
 @keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
 @media (prefers-reduced-motion: reduce) { .phase.flash { animation: none; } }
 .small, .muted.small, .goal, .tag { font-weight: 500; }
+.chip-groups { display: grid; gap: 6px; }
+.chip-group { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; margin-top: 4px; }
+#f-devother, #f-anesother { margin-top: 6px; }
+.log-more { justify-self: start; }
+.store-note { color: var(--warn-fg); background: var(--warn-soft); border-radius: 8px; padding: 8px 12px; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .progress .bar-fill { transition: none; } }
@@ -293,7 +302,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
 
   <section id="timeline">
     <h2>術後時間軸：每個階段中，什麼是正常？</h2>
-    <p class="muted">這是一般常見的進度和狀況。每個人的手術內容、恢復速度都不同，請以你的醫師和物理治療師的建議為準。</p>
+    <p class="muted">這是一般常見的進度和狀況。每個人的手術內容、恢復速度都不同，<strong>請以你的醫師和物理治療師的建議為準。</strong></p>
     <span class="tag">內容審稿中：物理治療師</span>
     <ol class="timeline">
       <li class="phase" id="stage-pre">
@@ -455,7 +464,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
 
   <section id="tools">
     <h2>陪自己走的小工具</h2>
-    <p class="muted">復健不只是身體的事。透過三個小工具，陪你看見自己有多少支持、已經走了多遠，以及怎麼一步步面對恐懼。你寫的內容只會存在自己的裝置上，不會上傳。</p>
+    <p class="muted">復健不只是身體的事。透過三個小工具，陪你看見自己有多少支持、已經走了多遠，以及怎麼一步步面對恐懼。你寫的內容不會上傳。</p>
+    <p class="small store-note">紀錄只存在這台手機的這個瀏覽器裡。換手機、換瀏覽器（例如從 LINE 改用 Safari 開），或清除瀏覽器資料後，就會看不到。</p>
 
     <div class="tool" id="tool-team">
       <h3>我的復健團隊</h3>
@@ -473,6 +483,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
         <button type="submit">記下來</button>
       </form>
       <ul class="log-list" id="logList"></ul>
+      <button type="button" class="link log-more" id="logMore" hidden></button>
     </div>
 
     <div class="tool" id="tool-fear">
@@ -559,7 +570,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <label class="chip"><input type="radio" name="graft" value="自體膕旁肌腱"><span>自體膕旁肌腱</span></label>
             <label class="chip"><input type="radio" name="graft" value="自體髕骨肌腱"><span>自體髕骨肌腱</span></label>
             <label class="chip"><input type="radio" name="graft" value="自體股四頭肌腱"><span>自體股四頭肌腱</span></label>
-            <label class="chip"><input type="radio" name="graft" value="異體肌腱"><span>異體肌腱</span></label>
+            <label class="chip"><input type="radio" name="graft" value="異體肌腱"><span>異體肌腱（異體韌帶）</span></label>
+            <label class="chip"><input type="radio" name="graft" value="人工韌帶"><span>人工韌帶</span></label>
             <label class="chip"><input type="radio" name="graft" value="不確定"><span>不確定</span></label>
           </div>
         </div>
@@ -577,18 +589,42 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
       <fieldset>
         <legend>自費花費</legend>
         <div class="field">
-          <span class="lab" id="lab-dev">用了哪些自費醫材（可複選）</span>
-          <div class="chips" aria-labelledby="lab-dev">
+          <span class="lab" id="lab-dev">用了哪些自費醫材或注射（可複選）</span>
+          <div class="chip-groups" role="group" aria-labelledby="lab-dev">
+          <p class="chip-group">固定與移植物</p>
+          <div class="chips">
             <label class="chip"><input type="checkbox" name="dev" value="可吸收骨釘"><span>可吸收骨釘／螺釘</span></label>
-            <label class="chip"><input type="checkbox" name="dev" value="懸吊式固定"><span>懸吊式固定裝置</span></label>
-            <label class="chip"><input type="checkbox" name="dev" value="異體肌腱"><span>異體肌腱</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="懸吊式固定"><span>懸吊式固定（鈕扣）</span></label>
             <label class="chip"><input type="checkbox" name="dev" value="縫合錨釘"><span>縫合錨釘</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="異體肌腱"><span>異體肌腱（異體韌帶）</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="人工韌帶"><span>人工韌帶</span></label>
+          </div>
+          <p class="chip-group">半月板與軟骨</p>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="dev" value="半月板縫合器"><span>半月板縫合器／縫針（超過健保針數）</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="軟骨修復"><span>軟骨修復／再生</span></label>
+          </div>
+          <p class="chip-group">手術耗材</p>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="dev" value="關節鏡耗材"><span>關節鏡耗材（汽化棒、沖洗液）</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="防沾黏"><span>防沾黏凝膠</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="自費敷料"><span>自費敷料（防水、人工皮）</span></label>
+          </div>
+          <p class="chip-group">術中注射</p>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="dev" value="PRP"><span>PRP 高濃度血小板</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="羊膜"><span>羊膜</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="玻尿酸"><span>玻尿酸</span></label>
+          </div>
+          <div class="chips">
             <label class="chip"><input type="checkbox" name="dev" value="其他"><span>其他</span></label>
             <label class="chip"><input type="checkbox" name="dev" value="不確定"><span>不確定</span></label>
           </div>
+          </div>
+          <input id="f-devother" type="text" maxlength="60" placeholder="其他自費醫材是什麼？（選填）" hidden>
         </div>
         <div class="row2">
-          <div class="field"><label for="f-devcost">自費醫材總額</label><div class="money"><input id="f-devcost" type="number" inputmode="numeric" min="0" step="1" placeholder="看收據上的金額"></div></div>
+          <div class="field"><label for="f-devcost">自費醫材、注射總額</label><div class="money"><input id="f-devcost" type="number" inputmode="numeric" min="0" step="1" placeholder="看收據上的金額"></div></div>
           <div class="field"><label for="f-ward">病房差額總額</label><div class="money"><input id="f-ward" type="number" inputmode="numeric" min="0" step="1" placeholder="住健保房填 0"></div></div>
         </div>
         <div class="row2">
@@ -601,9 +637,13 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <label class="chip"><input type="checkbox" name="anes" value="神經阻斷"><span>神經阻斷</span></label>
             <label class="chip"><input type="checkbox" name="anes" value="自控式止痛"><span>自控式止痛（PCA）</span></label>
             <label class="chip"><input type="checkbox" name="anes" value="自費止痛針"><span>自費止痛針</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="止暈止吐"><span>止暈止吐藥</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="保暖毯"><span>保暖毯／加熱毯</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="新型麻醉解藥"><span>新型麻醉解藥</span></label>
             <label class="chip"><input type="checkbox" name="anes" value="其他"><span>其他</span></label>
             <label class="chip"><input type="checkbox" name="anes" value="沒有"><span>沒有</span></label>
           </div>
+          <input id="f-anesother" type="text" maxlength="60" placeholder="其他麻醉、止痛項目是什麼？（選填）" hidden>
         </div>
         <div class="field"><label for="f-anescost">麻醉、止痛自費總額</label><div class="money"><input id="f-anescost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒有填 0"></div></div>
         <div class="row2">
@@ -866,11 +906,13 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
       graft: (form.querySelector('input[name="graft"]:checked') || {}).value || "",
       combined: checked(form, "combo"),
       devices: checked(form, "dev"),
+      devOther: $("f-devother").value.trim().slice(0, 60),
       deviceCost: num("f-devcost", 1000000),
       wardCost: num("f-ward", 1000000),
       days: num("f-days", 60),
       braceCost: num("f-brace", 200000),
       anes: checked(form, "anes"),
+      anesOther: $("f-anesother").value.trim().slice(0, 60),
       anesCost: num("f-anescost", 200000),
       carer: $("f-carer").value,
       carerCost: num("f-carercost", 300000),
@@ -895,10 +937,10 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
       "手術年份：" + r.year, "縣市：" + r.city,
       "醫院：" + (r.hospital || "未填") + "（" + r.level + "）",
       "移植物：" + r.graft, "其他處置：" + (r.combined.join("、") || "無"),
-      "自費醫材：" + (r.devices.join("、") || "未填"),
+      "自費醫材：" + (r.devices.join("、") || "未填") + (r.devOther ? "（其他：" + r.devOther + "）" : ""),
       "自費醫材總額：" + m(r.deviceCost), "病房差額：" + m(r.wardCost),
       "住院天數：" + (r.days ?? "未填"), "支架／護具：" + m(r.braceCost),
-      "麻醉止痛自費：" + (r.anes.join("、") || "未填") + "，共 " + m(r.anesCost),
+      "麻醉止痛自費：" + (r.anes.join("、") || "未填") + (r.anesOther ? "（其他：" + r.anesOther + "）" : "") + "，共 " + m(r.anesCost),
       "住院照顧：" + (r.carer || "未填") + "，看護費 " + m(r.carerCost),
       "物理治療：" + (r.ptType || "未填") + "，自費每次 " + m(r.ptCost),
       "商業保險理賠：" + (r.insurance || "不想回答"), "想對傷友說的話：" + (r.note || "無") + (r.note ? "（" + (r.noteConsent ? "同意公開" : "不公開") + "）" : "")].join("\n");
@@ -1151,7 +1193,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     const reset = el("button", { type: "button", class: "link" }, "全部取消勾選");
     reset.addEventListener("click", () => { boxes.forEach((b) => { b.checked = false; }); Object.keys(checks).filter((k) => k.startsWith(sec + ":")).forEach((k) => delete checks[k]); saveChecks(); update(); });
     prog.append(count, track, reset);
-    const note = el("p", { class: "small muted" }, "勾選只會記在你這台裝置上，不會上傳。");
+    const note = el("p", { class: "small muted" }, "勾選不會上傳，只存在這台手機的這個瀏覽器裡。");
     section.querySelector("h2").after(prog, note);
     function update() {
       const done = boxes.filter((b) => b.checked).length;
@@ -1245,17 +1287,26 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   }
   teamTip();
 
+  const LOG_SHOW = 3;
+  let logOpen = false;
   function renderLog() {
     const list = $("logList"); list.replaceChildren();
-    if (!tools.log.length) { list.append(el("li", { class: "small muted" }, "還沒有紀錄。第一筆可以很小，例如「今天冰敷完腫消了一點」。")); return; }
-    tools.log.slice().reverse().forEach((x) => {
+    const more = $("logMore");
+    if (!tools.log.length) { list.append(el("li", { class: "small muted" }, "還沒有紀錄。第一筆可以很小，例如「今天冰敷完腫消了一點」。")); more.hidden = true; return; }
+    const all = tools.log.slice().reverse();
+    const shown = logOpen ? all : all.slice(0, LOG_SHOW);
+    shown.forEach((x) => {
       const li = el("li");
       li.append(el("span", { class: "log-date" }, x.d), el("span", { class: "log-text" }, x.t));
       const del = el("button", { type: "button", class: "link", "aria-label": "刪除這筆" }, "刪除");
       del.addEventListener("click", () => { tools.log = tools.log.filter((y) => y !== x); saveTools(); renderLog(); });
       li.append(del); list.append(li);
     });
+    more.hidden = all.length <= LOG_SHOW;
+    more.textContent = logOpen ? "收合，只看最近 " + LOG_SHOW + " 筆" : "看全部紀錄（共 " + all.length + " 筆）";
+    more.setAttribute("aria-expanded", String(logOpen));
   }
+  $("logMore").addEventListener("click", () => { logOpen = !logOpen; renderLog(); });
   $("logForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const v = $("logText").value.trim(); if (!v) return;
@@ -1298,6 +1349,46 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     a.addEventListener("click", () => openStage(a.getAttribute("href").slice(1)));
   });
   if (/^#stage-/.test(location.hash)) openStage(location.hash.slice(1));
+
+  // ---------------- 勾「其他」時出現填寫欄 ----------------
+  [["dev", "f-devother"], ["anes", "f-anesother"]].forEach(([name, id]) => {
+    const box = form.querySelector('input[name="' + name + '"][value="其他"]');
+    const input = $(id);
+    if (!box || !input) return;
+    const sync = () => { input.hidden = !box.checked; if (!box.checked) input.value = ""; };
+    box.addEventListener("change", () => { sync(); if (box.checked) input.focus(); });
+    form.addEventListener("reset", () => setTimeout(sync, 0));
+    sync();
+  });
+
+  // ---------------- 導覽列：目前所在的區塊會亮起來 ----------------
+  (function () {
+    const nav = document.querySelector("nav");
+    if (!nav) return;
+    const links = [...nav.querySelectorAll('a[href^="#"]')];
+    const items = links.map((a) => ({ a, sec: document.getElementById(a.getAttribute("href").slice(1)) })).filter((x) => x.sec);
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let current = null, ticking = false;
+    function update() {
+      ticking = false;
+      const line = nav.getBoundingClientRect().bottom + 24;
+      let active = null;
+      for (const it of items) { if (it.sec.getBoundingClientRect().top <= line) active = it; }
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+      if (atBottom && items.length) active = items[items.length - 1];
+      if (active === current) return;
+      if (current) { current.a.classList.remove("active"); current.a.removeAttribute("aria-current"); }
+      current = active;
+      if (!active) return;
+      active.a.classList.add("active");
+      active.a.setAttribute("aria-current", "true");
+      const left = active.a.offsetLeft - nav.clientWidth / 2 + active.a.offsetWidth / 2;
+      nav.scrollTo({ left: Math.max(0, left), behavior: smooth ? "smooth" : "auto" });
+    }
+    window.addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  })();
 
   // ---------------- 連線 ----------------
   (async () => {
