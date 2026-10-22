@@ -1,0 +1,1310 @@
+<title>ACL 術後地圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700;900&display=swap">
+<style>
+/* Layout: one plain column on white. The site's own monochrome blue (sky
+   #B5D2FC through navy #0E1E33) is the main visual: deep navy text, navy for
+   what you can tap, sky blue for highlights. Gray-blue sets the "mood" notes
+   apart; amber marks notes under review, red is kept for "go back to the
+   doctor", green only for "saved". Light theme only. */
+:root {
+  --bg: #ffffff;
+  --fg: #0e1e33;
+  --muted: #5a6e8a;
+  --line: #dde3eb;
+  --soft: #f2f5f9;
+  --accent: #304563;
+  --accent-strong: #0e1e33;
+  --accent-ink: #ffffff;
+  --accent-soft: #e8f1fe;
+  --highlight: #b5d2fc;
+  --warn-soft: #fff4e2;
+  --warn-fg: #8a5200;
+  --alert: #b42318;
+  --alert-soft: #fdf0ef;
+  --ok: #1d6b3f;
+  --mood-soft: #eef1f5;
+  --mood-fg: #304563;
+  --font: "Noto Serif TC", "Source Han Serif TC", "Songti TC", "PMingLiU", serif;
+  --display-weight: 900;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 16px; line-height: 1.8; font-weight: 400; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap {
+  max-width: 640px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 72px;
+}
+header { margin-top: 16px; padding: 24px 20px 22px; display: grid; gap: 16px; background: var(--accent-soft); border-radius: 16px; }
+h1 { margin: 0; display: grid; gap: 4px; font-weight: var(--display-weight); line-height: 1.35; }
+h1 .lead { font-size: 20px; font-weight: 700; color: var(--accent); }
+h1 .q { font-size: 34px; color: var(--accent-strong); margin-left: -0.5em; white-space: nowrap; }
+@media (max-width: 360px) { h1 .q { font-size: 30px; } }
+h2 { margin: 0; font-size: 24px; font-weight: var(--display-weight); line-height: 1.4; text-wrap: balance; }
+h3 { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.5; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+.eyebrow { margin: 0; font-size: 13px; font-weight: 700; letter-spacing: .08em; color: var(--accent); }
+
+nav {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg);
+  border-bottom: 1px solid var(--line); margin-top: 16px;
+  display: flex; gap: 8px; overflow-x: auto; padding-block: 10px;
+}
+nav a {
+  flex: 0 0 auto; color: var(--fg); text-decoration: none; font-size: 14px; font-weight: 500;
+  padding: 4px 12px; border-radius: 999px; background: var(--soft);
+}
+nav a:hover { background: var(--accent-soft); color: var(--accent-strong); }
+a { color: var(--accent-strong); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+section { padding-top: 40px; scroll-margin-top: 60px; display: grid; gap: 14px; }
+section + section { border-top: 1px solid var(--line); margin-top: 40px; }
+.tag { justify-self: start; font-size: 12px; font-weight: 500; color: var(--warn-fg); background: var(--warn-soft); border-radius: 4px; padding: 2px 8px; }
+
+/* Timeline */
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.phase { display: grid; grid-template-columns: 72px 1fr; gap: 16px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.phase:last-child { border-bottom: 0; }
+.when { font-weight: var(--display-weight); font-size: 16px; font-variant-numeric: tabular-nums; line-height: 1.5; color: var(--accent); }
+.when small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+.phase .body { display: grid; gap: 6px; min-width: 0; }
+.phase ul { margin: 0; padding-left: 1.1em; }
+.goal { font-size: 13px; color: var(--muted); }
+details.normal { margin-top: 4px; background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+details.normal > summary { font-size: 14px; font-weight: 700; color: var(--accent-strong); }
+details.normal ul { margin: 6px 0 4px; padding-left: 1.1em; }
+.phase .alertbox { margin-top: 6px; }
+.phase .alertbox h3 { font-size: 16px; }
+.alertbox { background: var(--alert-soft); border-left: 4px solid var(--alert); border-radius: 0 8px 8px 0; padding: 12px 16px; display: grid; gap: 4px; }
+.alertbox h3 { color: var(--alert); }
+.alertbox ul { margin: 0; padding-left: 1.1em; }
+
+/* Forms */
+form, .panel { display: grid; gap: 16px; border: 1px solid var(--line); border-radius: 10px; padding: 18px 16px; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; min-width: 0; }
+legend { font-weight: 700; padding: 0; margin-bottom: 4px; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field > label, .lab { font-size: 13px; font-weight: 500; }
+.req { color: var(--alert); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 440px) { .row2 { grid-template-columns: 1fr; } }
+input[type=text], input[type=number], select, textarea {
+  font: inherit; font-size: 16px; color: var(--fg); background: var(--bg);
+  border: 1px solid #b1bbc9; border-radius: 6px; padding: 8px 10px; width: 100%;
+}
+input[type=text]:focus, input[type=number]:focus, select:focus, textarea:focus { border-color: var(--accent); }
+textarea { min-height: 72px; resize: vertical; }
+.money { position: relative; }
+.money input { padding-left: 42px; font-variant-numeric: tabular-nums; }
+.money::before { content: "NT$"; position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.chip span { display: inline-block; padding: 5px 12px; border-radius: 999px; border: 1px solid #b1bbc9; font-size: 14px; }
+.chip input:checked + span { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; }
+.check input { margin-top: 6px; accent-color: var(--accent); }
+.privacy { font-size: 13px; color: var(--accent-strong); background: var(--accent-soft); border-radius: 8px; padding: 10px 12px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button {
+  font: inherit; font-size: 14px; font-weight: 700; border-radius: 8px; padding: 9px 16px; cursor: pointer;
+  border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink);
+}
+button:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+button.ghost { background: var(--bg); color: var(--accent-strong); }
+button.ghost:hover { background: var(--accent-soft); }
+button.link { border: 0; background: none; color: var(--muted); padding: 4px 0; font-weight: 500; text-decoration: underline; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.status { font-size: 14px; }
+.status.ok { color: var(--ok); }
+.status.err { color: var(--alert); }
+.fallback { display: grid; gap: 8px; }
+.fallback textarea { font-size: 13px; min-height: 150px; }
+
+/* Stats */
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kpi { display: grid; gap: 0; background: var(--soft); border-radius: 8px; padding: 10px 12px; }
+.kpi .v { font-size: 24px; font-weight: var(--display-weight); font-variant-numeric: tabular-nums; line-height: 1.3; color: var(--accent-strong); }
+.kpi .k { font-size: 12px; color: var(--muted); }
+@media (max-width: 400px) { .kpis { grid-template-columns: 1fr 1fr; } }
+.tablebox { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 12px; color: var(--muted); font-weight: 500; }
+.n { text-align: right; font-variant-numeric: tabular-nums; }
+.empty { background: var(--soft); border-radius: 8px; padding: 16px; display: grid; gap: 4px; color: var(--muted); }
+.empty h3 { color: var(--fg); }
+
+/* Gifts */
+.safety { background: var(--warn-soft); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; }
+.safety h3 { color: var(--warn-fg); }
+.safety ul { margin: 0; padding-left: 1.1em; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filters select { width: auto; min-width: 140px; }
+.gifts { display: grid; gap: 0; list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.gift { padding-block: 14px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+.gift .top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; justify-content: space-between; }
+.gift .meta { font-size: 13px; color: var(--muted); }
+.gift .badge { font-size: 12px; background: var(--accent-soft); color: var(--accent-strong); border-radius: 4px; padding: 1px 8px; }
+.gift.done { opacity: .55; }
+.reveal { background: var(--accent-soft); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
+.contact { font-weight: 700; font-size: 16px; user-select: all; word-break: break-all; }
+.gift-form { margin-top: 4px; }
+details > summary { cursor: pointer; font-weight: 700; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "+ "; }
+details[open] > summary::before { content: "− "; }
+
+header p + p { margin-top: 2px; }
+.block { display: grid; gap: 6px; }
+.block ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.callout { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.callout .cta { justify-self: start; display: inline-block; text-decoration: none; font-weight: 700; font-size: 14px; color: var(--accent-ink); background: var(--accent); border-radius: 8px; padding: 8px 14px; }
+.callout .cta:hover { background: var(--accent-strong); }
+.links { display: grid; gap: 14px; }
+.links div { display: grid; gap: 2px; }
+.sources { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.sources li { display: grid; gap: 0; }
+.sources a, .src-name { font-weight: 500; }
+.sources li span:last-child { font-size: 13px; color: var(--muted); }
+.progress { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; font-size: 14px; }
+.progress .count { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--accent-strong); }
+.progress .bar-track { flex: 1 1 120px; height: 8px; background: var(--soft); border-radius: 4px; overflow: hidden; min-width: 80px; }
+.progress .bar-fill { height: 100%; background: linear-gradient(90deg, var(--highlight), var(--accent)); width: 0; transition: width .2s; }
+ul.checklist { list-style: none; padding-left: 0 !important; }
+ul.checklist label { display: flex; gap: 10px; align-items: flex-start; cursor: pointer; }
+ul.checklist input { margin-top: 6px; flex: 0 0 auto; width: 18px; height: 18px; accent-color: var(--accent); }
+ul.checklist input:checked + span { color: var(--muted); text-decoration: line-through; }
+details.mood { margin-top: 4px; background: var(--mood-soft); border-left: 3px solid #667a96; border-radius: 0 8px 8px 0; padding: 8px 12px; }
+details.mood > summary { font-size: 14px; font-weight: 700; color: var(--mood-fg); }
+details.mood ul { margin: 6px 0 6px; padding-left: 1.1em; }
+details.mood .tip { font-size: 14px; border-top: 1px dashed #b1bbc9; padding-top: 6px; }
+.wall { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; display: grid; gap: 6px; }
+.wall-label { font-size: 12px; font-weight: 700; color: var(--accent-strong); letter-spacing: .04em; }
+.wall blockquote, .pending blockquote { margin: 0; font-size: 14px; }
+.wall blockquote::before { content: "「"; } .wall blockquote::after { content: "」"; }
+.owner { border: 1px dashed var(--accent); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; }
+.pending { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.pending li { display: grid; gap: 4px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+.pending li:last-child { border-bottom: 0; }
+.helpline { background: var(--mood-soft); border-radius: 8px; padding: 10px 12px; }
+.tool { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
+.tool .tip { font-size: 14px; color: var(--mood-fg); background: var(--mood-soft); border-radius: 8px; padding: 8px 12px; }
+.team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 440px) { .team-grid { grid-template-columns: 1fr; } }
+.team-card { display: grid; gap: 6px; background: var(--soft); border-radius: 8px; padding: 10px 12px; min-width: 0; }
+.team-card label { display: grid; gap: 0; }
+.inline-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 0; padding: 0; }
+.inline-form input[type=text] { flex: 1 1 200px; width: auto; }
+.fear-form input[type=range] { flex: 1 1 140px; accent-color: var(--accent); }
+.fear-score { font-size: 13px; color: var(--muted); }
+.fear-score output { font-weight: 700; color: var(--fg); font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.log-list, .fear-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0; }
+.log-list li, .fear-list li { display: flex; gap: 10px; align-items: baseline; padding-block: 8px; border-bottom: 1px solid var(--line); }
+.log-list li:last-child, .fear-list li:last-child { border-bottom: 0; }
+.log-date { flex: 0 0 auto; font-size: 13px; color: var(--accent-strong); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 40px; }
+.log-text, .fear-name { flex: 1 1 auto; min-width: 0; }
+.fear-list { counter-reset: f; }
+.fear-list li:not(.empty-li)::before { counter-increment: f; content: counter(f); flex: 0 0 auto; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong); font-size: 12px; font-weight: 700; display: inline-grid; place-items: center; }
+.fear-bar { flex: 0 0 60px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--mood-fg) var(--w), var(--soft) var(--w)); align-self: center; }
+.fear-num { flex: 0 0 auto; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.intro { display: grid; gap: 12px; }
+.voice { margin: 0; padding: 4px 0 4px 14px; border-left: 3px solid var(--highlight); color: var(--accent); font-weight: 700; }
+.voice span { display: block; font-weight: 400; font-size: 14px; color: var(--muted); }
+.stage-pick { display: grid; gap: 4px; padding-top: 16px; border-top: 1px solid var(--highlight); }
+.stage-label { font-size: 18px; font-weight: var(--display-weight); }
+.stage-hint { font-size: 13px; color: var(--muted); font-weight: 500; margin-bottom: 8px; }
+.stage-links { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 8px; }
+.stage-links a { display: grid; align-content: center; justify-items: center; gap: 0; text-align: center; text-decoration: none; color: var(--accent-strong); background: var(--bg); border: 1px solid var(--highlight); border-radius: 10px; padding: 10px 4px; line-height: 1.35; }
+.stage-links a small { font-size: 12px; color: var(--muted); font-weight: 500; }
+.stage-links a b { font-size: 16px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.stage-links a:hover { background: var(--highlight); }
+.phase { scroll-margin-top: 64px; }
+.phase.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
+@media (prefers-reduced-motion: reduce) { .phase.flash { animation: none; } }
+.small, .muted.small, .goal, .tag { font-weight: 500; }
+footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+@media (prefers-reduced-motion: reduce) { .progress .bar-fill { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">ACL 術後地圖</p>
+    <h1><span class="lead">術後的你，可能每天都在問：</span><span class="q">「我這樣正常嗎？」</span></h1>
+    <div class="intro">
+      <p>腫成這樣正常嗎？膝蓋有聲音正常嗎？角度一直上不去正常嗎？離回診還很久，只能上網問問別人。</p>
+      <blockquote class="voice">「如果有人跟我說正常就好了吧。」<span>曾經的術後我，是這麼想的。</span></blockquote>
+      <p>以下整理每個階段常見的狀況、術前準備，以及傷友們的實際花費。</p>
+    </div>
+    <div class="stage-pick">
+      <p class="stage-label">你現在在哪個階段？</p>
+      <p class="stage-hint">點一下，直接看那個階段的常見狀況</p>
+      <div class="stage-links">
+        <a href="#stage-pre"><small>術前</small><b>還沒開刀</b></a>
+        <a href="#stage-w0"><small>術後</small><b>0–2 週</b></a>
+        <a href="#stage-w2"><small>術後</small><b>2–6 週</b></a>
+        <a href="#stage-w6"><small>術後</small><b>6–12 週</b></a>
+        <a href="#stage-m3"><small>術後</small><b>3–6 個月</b></a>
+        <a href="#stage-m9"><small>術後</small><b>9 個月以上</b></a>
+      </div>
+    </div>
+  </header>
+
+  <nav aria-label="頁面段落">
+    <a href="#timeline">術後時間軸</a>
+    <a href="#tools">陪伴小工具</a>
+    <a href="#prep">術前清單</a>
+    <a href="#report">費用回報</a>
+    <a href="#stats">大家的數字</a>
+    <a href="#claims">理賠準備</a>
+    <a href="#pt">物治地圖</a>
+    <a href="#gifts">免費轉送</a>
+    <a href="#resources">公開資料</a>
+    <a href="#sources">資料來源</a>
+  </nav>
+
+  <section id="timeline">
+    <h2>術後時間軸：每個階段中，什麼是正常？</h2>
+    <p class="muted">這是一般常見的進度和狀況。每個人的手術內容、恢復速度都不同，請以你的醫師和物理治療師的建議為準。</p>
+    <span class="tag">內容審稿中：物理治療師</span>
+    <ol class="timeline">
+      <li class="phase" id="stage-pre">
+        <div class="when">術前</div>
+        <div class="body">
+          <h3>休息期</h3>
+          <ul>
+            <li>讓腫脹消退，練回完整伸直</li>
+            <li>練習大腿股四頭肌出力</li>
+            <li>和醫師確認移植物種類、自費項目、住院天數</li>
+          </ul>
+          <p class="goal">目標：膝蓋伸直、腫脹消退、走路正常</p>
+          <details class="normal"><summary>這時候常見的狀況</summary>
+            <ul>
+              <li>開刀前幾天開始緊張、睡不好，很多人都這樣，追追劇、打遊戲，轉移注意力吧！</li>
+              <li>透過下面的「術前準備」，確認物品準備好了。</li>
+            </ul>
+          </details>
+          <details class="mood"><summary>心情上常見的</summary>
+            <ul><li>突然不能運動，看到別人跑步、比賽會羨慕，覺得孤單</li><li>心裡一直問「為什麼是我」，好像有一部分的自己被拿走了</li></ul>
+            <p class="tip">會失落很正常，並不是太脆弱。試著把「復健」當成你現在的運動，先訂一個很小的新目標。也讓身邊的人知道你需要什麼幫忙，會讓壓力小很多喔！</p>
+          </details>
+          <div class="wall" data-stage="pre" hidden></div>
+        </div>
+      </li>
+      <li class="phase" id="stage-w0">
+        <div class="when">0–2 週</div>
+        <div class="body">
+          <h3>保護期</h3>
+          <ul>
+            <li>冰敷、抬高，控制腫脹</li>
+            <li>練伸直和大腿出力</li>
+            <li>依醫囑使用拐杖和支架</li>
+          </ul>
+          <p class="goal">目標：伸直 0°，按照醫囑凹角度</p>
+          <details class="normal"><summary>這時候常見的狀況</summary>
+            <ul>
+              <li>膝蓋很腫，瘀青慢慢擴散至小腿、腳踝</li>
+              <li>傷口附近、小腿外側的皮膚摸起來麻麻的</li>
+              <li>晚上因為只能仰躺，可能會難以入睡。</li>
+              <li>大腿怎麼用力都抬不太起來</li>
+            </ul>
+            <p class="small muted">如果腫痛一天比一天嚴重，或出現下方紅框的狀況，請不要等回診。</p>
+          </details>
+          <details class="mood"><summary>心情上常見的</summary>
+            <ul><li>痛到睡不著、需要人幫忙，變得有點低落</li></ul>
+            <p class="tip">害怕和焦慮會讓痛的感覺被放大。看影片、聽音樂、找人聊天、慢慢深呼吸，都能幫大腦把注意力從疼痛上移開。這是整段路最難熬的時候，但會過去的。</p>
+          </details>
+          <div class="wall" data-stage="w0" hidden></div>
+          <div class="alertbox" role="note">
+            <h3>有這些狀況，請馬上回診</h3>
+            <ul>
+              <li>發燒，或傷口紅、腫、熱、流膿</li>
+              <li>小腿突然腫起來、壓了會痛</li>
+              <li>喘不過氣或胸痛，請直接掛急診</li>
+            </ul>
+            <p class="small">之後的階段出現這些狀況，也一樣要馬上回診。</p>
+          </div>
+        </div>
+      </li>
+      <li class="phase" id="stage-w2">
+        <div class="when">2–6 週</div>
+        <div class="body">
+          <h3>慢慢放下拐杖</h3>
+          <ul>
+            <li>逐步增加彎曲角度</li>
+            <li>練習不用拐杖、步態漸漸穩定
+            </li>
+          </ul>
+          <p class="goal">目標：按照醫囑凹角度、不用拐杖走路</p>
+          <details class="normal"><summary>這時候常見的狀況</summary>
+            <ul>
+              <li>凹腳時又緊又痠，做完會痠痛一陣子</li>
+              <li>走多了、站久了，晚上又腫起來</li>
+              <li>受傷那隻腿看起來明顯變細</li>
+              <li>剛脫拐時腿軟、不太敢踩</li>
+            </ul>
+            <p class="small muted">角度好幾週都沒有進步、或一直伸不直，記得主動告訴醫師或治療師。</p>
+          </details>
+          <details class="mood"><summary>心情上常見的</summary>
+            <ul><li>進度好像比別人慢，忍不住一直比角度</li><li>每天都在等「什麼時候才會好」</li></ul>
+            <p class="tip">每個人開的刀、身體狀況都不一樣，比較的對象是上週的自己。把小進步記下來，例如「今天多彎了 5 度」，回頭看會發現自己走了很遠。</p>
+          </details>
+          <div class="wall" data-stage="w2" hidden></div>
+        </div>
+      </li>
+      <li class="phase" id="stage-w6">
+        <div class="when">6–12 週</div>
+        <div class="body">
+          <h3>穩固肌力基礎</h3>
+          <ul>
+            <li>腿部肌力、單腳平衡訓練</li>
+            <li>騎腳踏車、上下樓梯會越來越順</li>
+          </ul>
+          <p class="goal">目標：日常活動不痛，單腳站得穩</p>
+          <details class="normal"><summary>這時候常見的狀況</summary>
+            <ul>
+              <li>訓練完肌肉痠，隔天會好</li>
+              <li>膝蓋活動時有聲音，但不痛</li>
+              <li>下樓梯比上樓梯難，還是會想先下好腳</li>
+            </ul>
+            <p class="small muted">有聲音又伴隨疼痛、卡住或腫，就要讓醫師看看。</p>
+          </details>
+          <details class="mood"><summary>心情上常見的</summary>
+            <ul><li>開始覺得自己好了，想偷偷多練一點、提早回去</li><li>多練之後又腫又痛，覺得挫折</li></ul>
+            <p class="tip">急著回去很正常，但「多做一點一定更好」常常是復健最大的陷阱。真正的堅持，有時是知道什麼時候該停下來。照著治療師的節奏走，反而比較快。</p>
+          </details>
+          <div class="wall" data-stage="w6" hidden></div>
+        </div>
+      </li>
+      <li class="phase" id="stage-m3">
+        <div class="when">3–6 個月</div>
+        <div class="body">
+          <h3>開始跑、開始跳</h3>
+          <ul>
+            <li>治療師評估通過後，從直線慢跑開始</li>
+            <li>逐步加入跳躍和敏捷訓練</li>
+          </ul>
+          <p class="goal">目標：通過開跑評估</p>
+          <details class="normal"><summary>這時候常見的狀況</summary>
+            <ul>
+              <li>跑完膝蓋微腫、痠，休息後消退</li>
+              <li>取肌腱的地方（例如大腿後側）練某些動作會不舒服</li>
+              <li>身體好了，心裡還是怕，不敢跳、不敢轉</li>
+            </ul>
+          </details>
+          <details class="mood"><summary>心情上常見的</summary>
+            <ul><li>身體可以了，心裡還是不敢；治療師不在旁邊，就不敢做某些動作</li><li>遇到下坡、地面不平、下雨天會特別緊張</li></ul>
+            <p class="tip">怕再受傷是很自然的反應。可以和治療師一起，把害怕的動作從簡單排到困難，一步一步練。練的時候搭配慢慢呼吸、讓身體放鬆，身體和心會一起重新建立信任。</p>
+          </details>
+          <div class="wall" data-stage="m3" hidden></div>
+        </div>
+      </li>
+      <li class="phase" id="stage-m9">
+        <div class="when">9 個月<small>以上</small></div>
+        <div class="body">
+          <h3>回場前測試</h3>
+          <ul>
+            <li>單腳跳躍、肌力測試，兩腳互相比較</li>
+            <li>籃球、足球這類需要急停轉向的運動，通常建議至少 9 個月、且測試通過再回場</li>
+          </ul>
+          <p class="goal">常見標準：受傷腳的肌力達到另一腳的 90% 以上</p>
+          <details class="normal"><summary>這時候常見的狀況</summary>
+            <ul>
+              <li>高強度運動後偶爾會腫</li>
+              <li>很怕再斷一次。這很常見，可以跟治療師聊聊，用測試結果建立信心。</li>
+            </ul>
+          </details>
+          <details class="mood"><summary>心情上常見的</summary>
+            <ul><li>很怕再斷一次，回到場上時全身緊繃</li><li>擔心自己回不到受傷前的水準</li></ul>
+            <p class="tip">緊繃反而容易受傷，用測試結果提醒自己「我已經準備好了」。不管最後回到哪裡，這段路上練出來的耐心和韌性，都會一直跟著你。</p>
+          </details>
+          <div class="wall" data-stage="m9" hidden></div>
+        </div>
+      </li>
+    </ol>
+    <p class="small muted helpline">如果低落或焦慮持續好幾週，影響到睡眠、吃飯或上課上班，請找身心科醫師或心理師聊聊。這不是軟弱，是在照顧自己。</p>
+  </section>
+
+  <section id="tools">
+    <h2>陪自己走的小工具</h2>
+    <p class="muted">復健不只是身體的事。透過三個小工具，陪你看見自己有多少支持、走了多遠，以及怎麼一步步面對恐懼。你寫的內容只會存在自己的裝置上，不會上傳。</p>
+
+    <div class="tool" id="tool-team">
+      <h3>我的復健團隊</h3>
+      <p class="small muted">復健路上需要不同的人。每一格寫下一兩個名字，看看哪一格是空的。</p>
+      <div class="team-grid" id="teamGrid"></div>
+      <p class="tip" id="teamTip"></p>
+    </div>
+
+    <div class="tool" id="tool-log">
+      <h3>跟上週的自己比</h3>
+      <p class="small muted">別跟別人比角度，跟上週的自己比。每次有一點進步，就記下來。</p>
+      <form class="inline-form" id="logForm" novalidate>
+        <label class="sr" for="logText">這次的小進步</label>
+        <input id="logText" type="text" maxlength="80" placeholder="例：今天多彎了 5 度、第一次自己走完一段樓梯">
+        <button type="submit">記下來</button>
+      </form>
+      <ul class="log-list" id="logList"></ul>
+    </div>
+
+    <div class="tool" id="tool-fear">
+      <h3>害怕的動作排排看</h3>
+      <p class="small muted">把不敢做的動作寫下來，替每個動作打一個害怕分數。清單會從最不怕排到最怕，再帶去和治療師討論，從最上面開始一步步練習吧！</p>
+      <form class="inline-form fear-form" id="fearForm" novalidate>
+        <label class="sr" for="fearText">動作</label>
+        <input id="fearText" type="text" maxlength="40" placeholder="例：下樓梯、往前跳、急停">
+        <label class="fear-score" for="fearScore">害怕程度 <output id="fearOut">5</output> / 10</label>
+        <input id="fearScore" type="range" min="0" max="10" step="1" value="5">
+        <button type="submit">加入</button>
+      </form>
+      <ol class="fear-list" id="fearList"></ol>
+      <p class="small muted">練習時搭配慢慢呼吸、讓身體放鬆。哪些動作現在可以練、怎麼練，請以你的治療師建議為準。</p>
+    </div>
+    <p class="small muted">概念參考《Rebound》（Cheadle &amp; Kuzma, 2019）談到的社會支持與漸進練習，內容由本站整理。</p>
+  </section>
+
+  <section id="prep">
+    <h2>術前準備</h2>
+    <p class="muted">開完刀後的頭兩週，大魔王常常是洗澡、上廁所、出門這些小事。趁腳還能走的時候先準備好。</p>
+
+    <div class="block">
+      <h3>輔具：先借再買</h3>
+      <ul>
+        <li>洗澡椅（各縣市的輔具資源中心多半可借）</li>
+        <li>拐杖、助行器（部分開刀醫院、輔具資源中心可借）</li>
+        <li>術後膝支架（建議先和醫院確認要不要自備、跟誰買。如果打算申請保險理賠，購買前先看「理賠準備」。）</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>備品清單</h3>
+      <ul>
+        <li>浴室：洗澡椅、防滑墊。</li>
+        <li>廁所：馬桶旁有扶手會輕鬆很多，或考慮馬桶增高墊。</li>
+        <li>常用的東西移到不用彎腰、不用爬高就可取之處。</li>
+        <li>準備抬腿用的枕頭、冰敷袋，穿得進支架的寬褲。</li>
+        <li>一個人住的話，第一週先安排好外送、買菜，或請朋友輪流來幫忙。</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>住院照護：看護 or 家人？</h3>
+      <ul>
+        <li><strong>醫院配合的看護：</strong>詢問護理站協助媒合。</li>
+        <li><strong>健保住院整合照護：</strong>有參加的醫院，會由院方安排的照護人力協助，病人每天自付 0 到 1,050 元。可以直接問醫院，或到健保署網站查名單。</li>
+        <li><strong>人力仲介或線上平台：</strong>選擇比較多，可以先談好時段和工作內容。</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>麻醉和止痛的自費項目</h3>
+      <p>術後止痛常見的自費選項有神經阻斷、自控式止痛（PCA）、自費止痛針。開刀前可以先查你的醫院，或在麻醉諮詢時詢問。</p>
+    </div>
+
+    <div class="block">
+      <h3>開刀前問醫生的問題清單</h3>
+      <p class="muted">從手術方式、自費項目、麻醉，一路到出院前要確認的事，我們正在整理成一份清單，完成後會放在這裡。</p>
+    </div>
+  </section>
+
+  <section id="report">
+    <h2>匿名回報手術費用</h2>
+    <p>比價網只查得到單項醫材的價格。你的回報能讓下一個人知道，整個手術實際花費。</p>
+    <p class="privacy">所有回報都是匿名、去識別化的。手術時間只記年份，同一間醫院累積 3 筆以上才會公開數字。</p>
+
+    <form id="reportForm" novalidate>
+      <fieldset>
+        <legend>手術基本資料</legend>
+        <div class="row2">
+          <div class="field"><label for="f-year">手術年份 <span class="req">*</span></label><select id="f-year"></select></div>
+          <div class="field"><label for="f-city">醫院所在縣市 <span class="req">*</span></label><select id="f-city"></select></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f-hospital">醫院名稱</label><input id="f-hospital" type="text" maxlength="40" placeholder="例：○○醫院"></div>
+          <div class="field"><label for="f-level">醫院層級 <span class="req">*</span></label>
+            <select id="f-level"><option value="">請選擇</option><option>醫學中心</option><option>區域醫院</option><option>地區醫院</option><option>診所</option><option>不確定</option></select>
+          </div>
+        </div>
+        <div class="field">
+          <span class="lab" id="lab-graft">移植物種類 <span class="req">*</span></span>
+          <div class="chips" role="radiogroup" aria-labelledby="lab-graft">
+            <label class="chip"><input type="radio" name="graft" value="自體膕旁肌腱"><span>自體膕旁肌腱</span></label>
+            <label class="chip"><input type="radio" name="graft" value="自體髕骨肌腱"><span>自體髕骨肌腱</span></label>
+            <label class="chip"><input type="radio" name="graft" value="自體股四頭肌腱"><span>自體股四頭肌腱</span></label>
+            <label class="chip"><input type="radio" name="graft" value="異體肌腱"><span>異體肌腱</span></label>
+            <label class="chip"><input type="radio" name="graft" value="不確定"><span>不確定</span></label>
+          </div>
+        </div>
+        <div class="field">
+          <span class="lab" id="lab-combo">同時做的其他處置</span>
+          <div class="chips" aria-labelledby="lab-combo">
+            <label class="chip"><input type="checkbox" name="combo" value="半月板修補"><span>半月板修補</span></label>
+            <label class="chip"><input type="checkbox" name="combo" value="半月板部分切除"><span>半月板部分切除</span></label>
+            <label class="chip"><input type="checkbox" name="combo" value="其他韌帶"><span>其他韌帶</span></label>
+            <label class="chip"><input type="checkbox" name="combo" value="軟骨處置"><span>軟骨處置</span></label>
+          </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>自費花費</legend>
+        <div class="field">
+          <span class="lab" id="lab-dev">用了哪些自費醫材（可複選）</span>
+          <div class="chips" aria-labelledby="lab-dev">
+            <label class="chip"><input type="checkbox" name="dev" value="可吸收骨釘"><span>可吸收骨釘／螺釘</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="懸吊式固定"><span>懸吊式固定裝置</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="異體肌腱"><span>異體肌腱</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="縫合錨釘"><span>縫合錨釘</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="其他"><span>其他</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="不確定"><span>不確定</span></label>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f-devcost">自費醫材總額</label><div class="money"><input id="f-devcost" type="number" inputmode="numeric" min="0" step="1" placeholder="看收據上的金額"></div></div>
+          <div class="field"><label for="f-ward">病房差額總額</label><div class="money"><input id="f-ward" type="number" inputmode="numeric" min="0" step="1" placeholder="住健保房填 0"></div></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f-days">住院天數</label><input id="f-days" type="number" inputmode="numeric" min="0" step="1" placeholder="例：3"></div>
+          <div class="field"><label for="f-brace">術後支架／護具花費</label><div class="money"><input id="f-brace" type="number" inputmode="numeric" min="0" step="1" placeholder="沒買填 0"></div></div>
+        </div>
+        <div class="field">
+          <span class="lab" id="lab-anes">麻醉、止痛的自費項目（可複選）</span>
+          <div class="chips" aria-labelledby="lab-anes">
+            <label class="chip"><input type="checkbox" name="anes" value="神經阻斷"><span>神經阻斷</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="自控式止痛"><span>自控式止痛（PCA）</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="自費止痛針"><span>自費止痛針</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="其他"><span>其他</span></label>
+            <label class="chip"><input type="checkbox" name="anes" value="沒有"><span>沒有</span></label>
+          </div>
+        </div>
+        <div class="field"><label for="f-anescost">麻醉、止痛自費總額</label><div class="money"><input id="f-anescost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒有填 0"></div></div>
+        <div class="row2">
+          <div class="field"><label for="f-carer">住院期間誰照顧你</label>
+            <select id="f-carer"><option value="">請選擇</option><option>家人朋友</option><option>醫院配合的看護</option><option>健保住院整合照護</option><option>仲介或平台找的看護</option><option>自己</option></select>
+          </div>
+          <div class="field"><label for="f-carercost">看護費用總額</label><div class="money"><input id="f-carercost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒請看護填 0"></div></div>
+        </div>
+        <div class="row2">
+          <div class="field"><label for="f-pt">術後物理治療</label>
+            <select id="f-pt"><option value="">請選擇</option><option>健保復健</option><option>自費物理治療</option><option>兩者都有</option><option>還沒開始</option></select>
+          </div>
+          <div class="field"><label for="f-ptcost">自費物治每次費用</label><div class="money"><input id="f-ptcost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒有填 0"></div></div>
+        </div>
+        <div class="field"><label for="f-ins">商業保險有理賠嗎？</label>
+          <select id="f-ins"><option value="">不想回答</option><option>有</option><option>沒有</option><option>還在申請</option></select>
+        </div>
+        <div class="field"><label for="f-note">想對傷友說的話</label>
+          <textarea id="f-note" maxlength="300" placeholder="例：最痛的那兩週真的會過去，慢慢來沒關係。請不要寫姓名或醫師姓名。"></textarea>
+        </div>
+        <div class="field"><label for="f-notestage">想送給哪個階段的傷友？</label>
+          <select id="f-notestage"><option value="">都可以</option><option value="pre">術前</option><option value="w0">術後 0–2 週</option><option value="w2">術後 2–6 週</option><option value="w6">術後 6–12 週</option><option value="m3">術後 3–6 個月</option><option value="m9">9 個月以上</option></select>
+        </div>
+        <label class="check"><input type="checkbox" id="f-noteok"> 同意匿名公開這段話。審核後會出現在時間軸對應的階段，讓正在那裡的人看見。</label>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" id="submitBtn">送出回報</button>
+        <span class="status" id="status" role="status" aria-live="polite"></span>
+      </div>
+      <div class="fallback" id="fallback" hidden>
+        <p class="small muted">這個預覽版目前只開放受邀的人直接送出。你可以複製下面的文字，私訊給我們的 IG，我們會幫你匿名登錄。</p>
+        <textarea id="fallbackText" readonly aria-label="回報內容"></textarea>
+        <div class="actions"><button type="button" class="ghost" id="copyReport">複製文字</button><span class="status" id="copyReportStatus" role="status" aria-live="polite"></span></div>
+      </div>
+    </form>
+  </section>
+
+  <section id="stats">
+    <h2>大家的數字</h2>
+    <p class="muted small">用中位數呈現</p>
+    <div class="kpis">
+      <div class="kpi"><span class="v" id="k-n">0</span><span class="k">筆回報</span></div>
+      <div class="kpi"><span class="v" id="k-dev">—</span><span class="k">自費醫材中位數</span></div>
+      <div class="kpi"><span class="v" id="k-ward">—</span><span class="k">病房差額中位數</span></div>
+    </div>
+    <div class="owner" id="ownerPanel" hidden>
+      <h3>待審核的留言（只有你看得到）</h3>
+      <p class="small muted">按「公開」後，這段話會出現在時間軸對應的階段。含有姓名、醫師、醫院評價或不適合的內容，請按「不公開」。</p>
+      <ul class="pending" id="pendingList"></ul>
+    </div>
+    <div id="statsBody">
+      <div class="empty"><h3>還沒有回報</h3><p>第一筆回報送出後，這裡會依移植物種類和醫院整理出來。</p></div>
+    </div>
+  </section>
+
+  <section id="claims">
+    <h2>理賠準備</h2>
+    <p class="muted">保險理賠常卡在文件不夠齊全。開刀前花十分鐘確認，可以增加效率。</p>
+    <span class="tag">實際以你的保單條款和保險公司說明為準</span>
+
+    <div class="block">
+      <h3>開刀前</h3>
+      <ul>
+        <li>翻出所有保單，確認是哪一種：實支實付、住院日額、意外險，或是工作中受傷的勞保職災、車禍的強制險。</li>
+        <li>打給保險公司或業務員，確認哪些自費項目能賠、需要哪些文件。</li>
+        <li>支架、護具要買之前先詢問：在醫院買、開在醫院收據裡。這和自己在外面買的理賠方式可能不同。</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>出院時要拿的文件</h3>
+      <ul>
+        <li>診斷證明書：請醫師如實寫明受傷原因、手術名稱、住院天數，以及需要休養的時間。</li>
+        <li>醫療費用收據，加上自費項目明細。</li>
+        <li>不同保險公司通常各要一份，可以一次多申請幾份。</li>
+        <li>車禍或工作受傷，另外保留事故證明、報案紀錄、請假紀錄。</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>之後的復健和回診</h3>
+      <ul>
+        <li>自費物理治療請治療所開立收據，能不能賠要看保單，先問再買課程。</li>
+        <li>回診、打針這類後續門診費用，有些保單也能申請，記得要留收據。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="pt">
+    <h2>物理治療所地圖</h2>
+    <p class="muted">術後復健做得好不好，很大一部分取決於找到合適的治療師。本站不推薦或評比任何物理治療所，只幫你整理尋找方法和問題。</p>
+
+    <div class="callout">
+      <h3>全台物理治療所清單</h3>
+      <p class="muted">物理治療師公會全國聯合會整理了全台登記的物理治療所，可以依縣市查詢，並標示健保或自費。</p>
+      <a class="cta" href="https://www.pt.org.tw/clinic" target="_blank" rel="noopener">打開物理治療所清單</a>
+    </div>
+
+    <div class="block">
+      <h3>第一次去可以帶的東西</h3>
+      <ul>
+        <li>手術紀錄或出院病歷摘要（開了什麼、用哪種移植物、半月板有沒有處理）</li>
+        <li>醫師交代的限制：能不能踩地、支架開幾度、多久不能做什麼</li>
+        <li>你現在的狀況：角度、疼痛部位、恢復狀態</li>
+      </ul>
+    </div>
+
+    <div class="block">
+      <h3>第一次去可以問的問題</h3>
+      <ul>
+        <li>有沒有帶過十字韌帶術後的個案？</li>
+        <li>會先做評估嗎？每個階段的訓練目標是什麼？</li>
+        <li>一次多久、費用多少？可以先上單堂，不用一次買課程嗎？</li>
+        <li>能開收據嗎？（申請保險時需要）</li>
+        <li>回家可以做哪些運動？組數？</li>
+        <li>多久重新評估一次進度？</li>
+      </ul>
+    </div>
+    <p class="small muted">自費物理治療每次大概金額，可以看「大家的數字」，資料來自匿名費用回報。</p>
+  </section>
+
+  <section id="gifts">
+    <h2>免費轉送</h2>
+    <p>術後用過、現在用不到的東西，送給剛開完刀的人。這裡只開放免費贈送，不能標價販售。</p>
+
+    <div class="safety">
+      <h3>交換前請先看</h3>
+      <ul>
+        <li>只限免費贈送。寄送運費由雙方自行溝通。</li>
+        <li>若面交，建議約在公共場合。</li>
+        <li>術後支架要依個人調整角度和尺寸，拿到後請先請物理治療師或醫師確認。</li>
+        <li>本站不檢查物品狀況，也不參與聯絡，請雙方自行協調。</li>
+        <li>刊登 30 天後會自動下架。</li>
+      </ul>
+    </div>
+
+    <div class="filters">
+      <label class="small" for="g-filter-city">縣市</label>
+      <select id="g-filter-city"><option value="">全部縣市</option></select>
+      <label class="small" for="g-filter-cat">類別</label>
+      <select id="g-filter-cat"><option value="">全部類別</option></select>
+    </div>
+
+    <ul class="gifts" id="giftList"></ul>
+    <div class="empty" id="giftEmpty"><h3>目前沒有可索取的物品</h3><p>有用不到的東西嗎？在下面刊登，第一個就是你。</p></div>
+
+    <details class="gift-form" id="giftDetails">
+      <summary>我有東西要送</summary>
+      <form id="giftForm" novalidate style="margin-top:12px">
+        <div class="row2">
+          <div class="field"><label for="g-cat">類別 <span class="req">*</span></label><select id="g-cat"></select></div>
+          <div class="field"><label for="g-cond">狀況 <span class="req">*</span></label>
+            <select id="g-cond"><option value="">請選擇</option><option>全新未拆</option><option>幾乎全新</option><option>有使用痕跡，功能正常</option></select>
+          </div>
+        </div>
+        <div class="field"><label for="g-name">物品說明 <span class="req">*</span></label><input id="g-name" type="text" maxlength="60" placeholder="例：術後可調角度支架，左右腳通用"></div>
+        <div class="row2">
+          <div class="field"><label for="g-size">尺寸（選填）</label><input id="g-size" type="text" maxlength="30" placeholder="例：M、大腿圍 45–55 cm"></div>
+          <div class="field"><label for="g-city">所在縣市 <span class="req">*</span></label><select id="g-city"></select></div>
+        </div>
+        <div class="field">
+          <span class="lab" id="lab-deliver">交付方式 <span class="req">*</span></span>
+          <div class="chips" role="radiogroup" aria-labelledby="lab-deliver">
+            <label class="chip"><input type="radio" name="deliver" value="面交"><span>面交</span></label>
+            <label class="chip"><input type="radio" name="deliver" value="店到店寄送"><span>店到店寄送</span></label>
+            <label class="chip"><input type="radio" name="deliver" value="都可以"><span>都可以</span></label>
+          </div>
+        </div>
+        <div class="field"><label for="g-contact">你的 IG 帳號 <span class="req">*</span></label><input id="g-contact" type="text" maxlength="31" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="例：@your_ig"></div>
+        <p class="small muted">對方按「我想要」並確認安全提醒後，才會看到你的 IG 帳號，再直接私訊你。請填你願意讓對方看到的帳號。</p>
+        <label class="check"><input type="checkbox" id="g-free"> 我確認這是免費贈送，不會向對方收錢（運費另外講好）。</label>
+        <div class="actions">
+          <button type="submit" id="giftSubmit">刊登</button>
+          <span class="status" id="giftStatus" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+    </details>
+  </section>
+
+  <section id="resources">
+    <h2>公開資料去哪查</h2>
+    <div class="links">
+      <div><h3>健保署「自費醫材比價網」</h3><p class="muted">查同一項自費醫材在各醫院收多少錢，例如骨釘、固定裝置。到<a href="https://www.nhi.gov.tw/" target="_blank" rel="noopener">健保署網站</a>搜尋「自費醫材比價網」。</p></div>
+      <div><h3>醫院的自費收費標準</h3><p class="muted">多數醫院會在官網公告，包括神經阻斷這類麻醉止痛項目。搜尋「醫院名稱＋自費收費標準」就找得到。</p></div>
+      <div><h3>健保住院整合照護</h3><p class="muted">到<a href="https://www.nhi.gov.tw/" target="_blank" rel="noopener">健保署網站</a>搜尋「住院整合照護」，可以查有參加的醫院。</p></div>
+      <div><h3>物理治療所</h3><p class="muted">看上面的「找物治所」，有全台清單和第一次去要問的問題。</p></div>
+    </div>
+  </section>
+
+  <section id="sources">
+    <h2>資料來源</h2>
+    <p class="muted small">網站上的數字和說明都來自下列公開資料，查閱日期 2026 年 10 月 22 日。規定和價格可能變動，請以各單位最新公告為準。</p>
+    <ul class="sources">
+      <li><a href="https://www.nhi.gov.tw/" target="_blank" rel="noopener">衛生福利部中央健康保險署：自費醫材比價網</a><span>用途：查詢各醫院自費醫材收費</span></li>
+      <li><a href="https://mohw.gov.tw/cp-16-75851-1.html" target="_blank" rel="noopener">衛生福利部：住院整合照護服務試辦計畫說明（2023）</a><span>用途：整合照護自付金額</span></li>
+      <li><a href="https://www.pt.org.tw/clinic" target="_blank" rel="noopener">中華民國物理治療師公會全國聯合會：台灣物理治療所地圖</a><span>用途：物理治療所清單</span></li>
+      <li><a href="https://mohw.gov.tw/cp-16-83571-1.html" target="_blank" rel="noopener">衛生福利部：醫療器材網路販售相關說明</a><span>用途：轉送區只開放免費贈送的依據</span></li>
+      <li><span class="src-name">Cheadle, C. J., &amp; Kuzma, C. (2019). Rebound: Train your mind to bounce back stronger from sports injuries. Bloomsbury Sport.</span><span>用途：心情內容與小工具的概念參考</span></li>
+      <li><span class="src-name">病友經驗彙整</span><span>用途：整理最常被問的問題，只做匿名彙整，不引用個人發言</span></li>
+      <li><span class="src-name">本站匿名費用回報</span><span>用途：「大家的數字」的統計來源</span></li>
+    </ul>
+    <p class="muted small">術後時間軸是一般常見的復健進度整理，正在請物理治療師審閱。</p>
+  </section>
+
+  <footer>
+    <p>這裡是病友的經驗整理，不是醫療建議。治療上的決定，請和你的醫師、物理治療師討論。</p>
+    <p>本站不接受醫院或醫材廠商贊助。</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  const CITIES = ["台北市","新北市","基隆市","桃園市","新竹市","新竹縣","苗栗縣","台中市","彰化縣","南投縣","雲林縣","嘉義市","嘉義縣","台南市","高雄市","屏東縣","宜蘭縣","花蓮縣","台東縣","澎湖縣","金門縣","連江縣"];
+  const CATS = ["術後支架","護膝","拐杖","冰敷機／冷療機","彈力帶／訓練用品","其他"];
+  const DAY = 86400000, EXPIRE_DAYS = 30, MIN_N = 3;
+  const $ = (id) => document.getElementById(id);
+  const fillSelect = (sel, items, first) => { if (first !== null) sel.append(new Option(first, "")); items.forEach((v) => sel.append(new Option(v, v))); };
+
+  const thisYear = new Date().getFullYear();
+  $("f-year").append(new Option("請選擇", ""));
+  for (let y = thisYear; y >= thisYear - 15; y--) $("f-year").append(new Option(String(y), String(y)));
+  fillSelect($("f-city"), CITIES, "請選擇");
+  fillSelect($("g-city"), CITIES, "請選擇");
+  fillSelect($("g-cat"), CATS, "請選擇");
+  fillSelect($("g-filter-city"), CITIES, null);
+  fillSelect($("g-filter-cat"), CATS, null);
+
+  let db = null, user = null, myId = null, canWrite = null;
+
+  function el(tag, attrs, text) {
+    const e = document.createElement(tag);
+    if (attrs) Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function setStatus(node, text, kind) { node.textContent = text; node.className = "status" + (kind ? " " + kind : ""); }
+  function copy(text, ta, statusNode) {
+    const fail = () => { if (ta) { ta.focus(); ta.select(); } setStatus(statusNode, "請長按文字手動複製"); };
+    try { navigator.clipboard.writeText(text).then(() => setStatus(statusNode, "已複製", "ok"), fail); } catch (e) { fail(); }
+  }
+
+  // ---------------- 費用回報 ----------------
+  const form = $("reportForm"), statusEl = $("status"), submitBtn = $("submitBtn");
+  let writeRefused = false;
+  const num = (id, max) => {
+    const v = $(id).value.trim();
+    if (v === "") return null;
+    const n = Math.round(Number(v));
+    return Number.isFinite(n) && n >= 0 && n <= max ? n : NaN;
+  };
+  const checked = (f, name) => [...f.querySelectorAll('input[name="' + name + '"]:checked')].map((i) => i.value);
+
+  function collect() {
+    const r = {
+      year: Number($("f-year").value) || null,
+      city: $("f-city").value,
+      hospital: $("f-hospital").value.trim().replace(/\s+/g, " ").slice(0, 40),
+      level: $("f-level").value,
+      graft: (form.querySelector('input[name="graft"]:checked') || {}).value || "",
+      combined: checked(form, "combo"),
+      devices: checked(form, "dev"),
+      deviceCost: num("f-devcost", 1000000),
+      wardCost: num("f-ward", 1000000),
+      days: num("f-days", 60),
+      braceCost: num("f-brace", 200000),
+      anes: checked(form, "anes"),
+      anesCost: num("f-anescost", 200000),
+      carer: $("f-carer").value,
+      carerCost: num("f-carercost", 300000),
+      ptType: $("f-pt").value,
+      ptCost: num("f-ptcost", 20000),
+      insurance: $("f-ins").value,
+      note: $("f-note").value.trim().slice(0, 300),
+      noteStage: $("f-notestage").value,
+      noteConsent: $("f-noteok").checked,
+    };
+    const missing = [];
+    if (!r.year) missing.push("手術年份");
+    if (!r.city) missing.push("縣市");
+    if (!r.level) missing.push("醫院層級");
+    if (!r.graft) missing.push("移植物種類");
+    const bad = ["deviceCost","wardCost","days","braceCost","anesCost","carerCost","ptCost"].some((k) => Number.isNaN(r[k]));
+    return { r, missing, bad };
+  }
+  function toText(r) {
+    const m = (v) => (v === null || v === undefined ? "未填" : "NT$" + v.toLocaleString("zh-TW"));
+    return ["【ACL 匿名費用回報】",
+      "手術年份：" + r.year, "縣市：" + r.city,
+      "醫院：" + (r.hospital || "未填") + "（" + r.level + "）",
+      "移植物：" + r.graft, "其他處置：" + (r.combined.join("、") || "無"),
+      "自費醫材：" + (r.devices.join("、") || "未填"),
+      "自費醫材總額：" + m(r.deviceCost), "病房差額：" + m(r.wardCost),
+      "住院天數：" + (r.days ?? "未填"), "支架／護具：" + m(r.braceCost),
+      "麻醉止痛自費：" + (r.anes.join("、") || "未填") + "，共 " + m(r.anesCost),
+      "住院照顧：" + (r.carer || "未填") + "，看護費 " + m(r.carerCost),
+      "物理治療：" + (r.ptType || "未填") + "，自費每次 " + m(r.ptCost),
+      "商業保險理賠：" + (r.insurance || "不想回答"), "想對傷友說的話：" + (r.note || "無") + (r.note ? "（" + (r.noteConsent ? "同意公開" : "不公開") + "）" : "")].join("\n");
+  }
+  function showFallback(r) { $("fallback").hidden = false; $("fallbackText").value = toText(r); }
+  $("copyReport").addEventListener("click", () => copy($("fallbackText").value, $("fallbackText"), $("copyReportStatus")));
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const { r, missing, bad } = collect();
+    if (missing.length) return setStatus(statusEl, "還差：" + missing.join("、"), "err");
+    if (bad) return setStatus(statusEl, "金額或天數請填 0 以上的整數。", "err");
+    if (!db || canWrite === false || writeRefused) { showFallback(r); return setStatus(statusEl, "請用下方文字回報"); }
+    submitBtn.disabled = true; setStatus(statusEl, "送出中…");
+    const now = new Date();
+    try {
+      await db.collection("reports").add(Object.assign({}, r, { submitted: now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0"), v: 1 }));
+      setStatus(statusEl, "收到了，謝謝你幫下一個人。", "ok");
+      form.reset(); $("fallback").hidden = true;
+    } catch (err) {
+      const code = err && err.code;
+      if (code === "invalid_argument" || code === "not_granted" || code === "quota_exceeded") {
+        writeRefused = true; showFallback(r); setStatus(statusEl, "目前無法直接送出，請改用下方文字回報。", "err");
+      } else setStatus(statusEl, "連線不太穩，請稍後再按一次。", "err");
+    } finally { submitBtn.disabled = false; }
+  });
+
+  // ---------------- 統計 ----------------
+  const median = (arr) => {
+    const a = arr.filter((v) => typeof v === "number" && Number.isFinite(v)).sort((x, y) => x - y);
+    if (!a.length) return null;
+    const m = Math.floor(a.length / 2);
+    return a.length % 2 ? a[m] : Math.round((a[m - 1] + a[m]) / 2);
+  };
+  const money = (v) => (v === null ? "—" : "$" + v.toLocaleString("zh-TW"));
+  function table(headers, rows) {
+    const box = el("div", { class: "tablebox" }), t = el("table"), thead = el("thead"), tr = el("tr");
+    headers.forEach(([h, n]) => tr.append(el("th", n ? { class: "n" } : null, h)));
+    thead.append(tr); t.append(thead);
+    const tb = el("tbody");
+    rows.forEach((cells) => { const r = el("tr"); cells.forEach(([v, n]) => r.append(el("td", n ? { class: "n" } : null, v))); tb.append(r); });
+    t.append(tb); box.append(t); return box;
+  }
+  function renderStats(reports) {
+    $("k-n").textContent = reports.length;
+    $("k-dev").textContent = reports.length >= MIN_N ? money(median(reports.map((r) => r.deviceCost))) : "—";
+    $("k-ward").textContent = reports.length >= MIN_N ? money(median(reports.map((r) => r.wardCost))) : "—";
+    const body = $("statsBody"); body.replaceChildren();
+    if (!reports.length) {
+      const e = el("div", { class: "empty" });
+      e.append(el("h3", null, "還沒有回報"), el("p", null, "第一筆回報送出後，這裡會依移植物種類和醫院整理出來。"));
+      return body.append(e);
+    }
+    const wrap = el("div"); wrap.style.cssText = "display:grid;gap:14px";
+    const byGraft = {};
+    reports.forEach((r) => { (byGraft[r.graft || "不確定"] ||= []).push(r); });
+    wrap.append(el("h3", null, "依移植物種類"), table([["移植物"], ["回報數", true], ["自費醫材中位數", true]],
+      Object.entries(byGraft).sort((a, b) => b[1].length - a[1].length).map(([g, rs]) => [[g], [String(rs.length), true], [rs.length >= MIN_N ? money(median(rs.map((r) => r.deviceCost))) : "累積中", true]])));
+    const other = [["麻醉、止痛自費", "anesCost"], ["看護費用", "carerCost"], ["支架／護具", "braceCost"], ["自費物治（每次）", "ptCost"]].map(([label, key]) => {
+      const vals = reports.map((r) => r[key]).filter((v) => typeof v === "number");
+      return [[label], [String(vals.length), true], [vals.length >= MIN_N ? money(median(vals)) : "累積中", true]];
+    });
+    wrap.append(el("h3", null, "其他常見花費"), table([["項目"], ["回報數", true], ["中位數", true]], other));
+    const byHosp = {};
+    reports.forEach((r) => { if (r.hospital) (byHosp[r.hospital + "｜" + r.city] ||= []).push(r); });
+    const hRows = Object.entries(byHosp).filter(([, rs]) => rs.length >= MIN_N).sort((a, b) => b[1].length - a[1].length).map(([k, rs]) => {
+      const [h, c] = k.split("｜"); const d = median(rs.map((r) => r.days));
+      return [[h], [c], [String(rs.length), true], [money(median(rs.map((r) => r.deviceCost))), true], [money(median(rs.map((r) => r.wardCost))), true], [d === null ? "—" : d + " 天", true]];
+    });
+    wrap.append(el("h3", null, "依醫院"));
+    if (hRows.length) wrap.append(table([["醫院"], ["縣市"], ["回報數", true], ["自費醫材", true], ["病房差額", true], ["住院", true]], hRows));
+    else { const p = Object.keys(byHosp).length; wrap.append(el("p", { class: "small muted" }, p ? "已有 " + p + " 間醫院收到回報，但都還不到 3 筆，先不公開。" : "還沒有人填醫院名稱。")); }
+    body.append(wrap);
+  }
+
+  // ---------------- 免費轉送 ----------------
+  // 每位刊登者一份文件：gifts/<自己的 id> = { items: [...] }，只有本人能改。
+  let giftDocs = []; // [{ownerId, items}]
+  const revealed = new Set();
+  const giftForm = $("giftForm"), giftStatus = $("giftStatus"), giftSubmit = $("giftSubmit");
+  const fmtDate = (ms) => { const d = new Date(ms); return (d.getMonth() + 1) + "/" + d.getDate(); };
+
+  function renderGifts() {
+    const fCity = $("g-filter-city").value, fCat = $("g-filter-cat").value;
+    const now = Date.now(), list = $("giftList");
+    list.replaceChildren();
+    const all = [];
+    giftDocs.forEach((d) => (d.items || []).forEach((it) => all.push(Object.assign({ ownerId: d.ownerId }, it))));
+    const visible = all.filter((it) => {
+      const mine = myId && it.ownerId === myId;
+      const expired = now - (it.postedAt || 0) > EXPIRE_DAYS * DAY;
+      if (!mine && (it.status === "given" || expired)) return false;
+      if (fCity && it.city !== fCity) return false;
+      if (fCat && it.category !== fCat) return false;
+      return true;
+    }).sort((a, b) => (b.postedAt || 0) - (a.postedAt || 0));
+
+    $("giftEmpty").hidden = visible.length > 0;
+    visible.forEach((it) => {
+      const mine = myId && it.ownerId === myId;
+      const expired = now - (it.postedAt || 0) > EXPIRE_DAYS * DAY;
+      const li = el("li", { class: "gift" + (it.status === "given" || expired ? " done" : "") });
+      const top = el("div", { class: "top" });
+      top.append(el("h3", null, it.name || it.category));
+      const badges = el("div", { class: "actions" });
+      badges.append(el("span", { class: "badge" }, it.category));
+      if (mine) badges.append(el("span", { class: "badge" }, it.status === "given" ? "已送出" : expired ? "已過期" : "你的刊登"));
+      top.append(badges);
+      li.append(top);
+      const meta = [it.condition, it.size ? "尺寸 " + it.size : "", it.city, it.deliver, fmtDate(it.postedAt) + " 刊登"].filter(Boolean).join(" · ");
+      li.append(el("p", { class: "meta" }, meta));
+
+      if (mine) {
+        const row = el("div", { class: "actions" });
+        if (it.status !== "given" && !expired) {
+          const b = el("button", { type: "button", class: "ghost" }, "標示為已送出");
+          b.addEventListener("click", () => editMine(it.id, (x) => Object.assign(x, { status: "given" }), "已標示為送出"));
+          row.append(b);
+        }
+        if (expired && it.status !== "given") {
+          const b = el("button", { type: "button", class: "ghost" }, "重新上架 30 天");
+          b.addEventListener("click", () => editMine(it.id, (x) => Object.assign(x, { postedAt: Date.now() }), "已重新上架"));
+          row.append(b);
+        }
+        const del = el("button", { type: "button", class: "link" }, "刪除這則刊登");
+        del.addEventListener("click", () => {
+          if (del.dataset.armed) return editMine(it.id, () => null, "已刪除");
+          del.dataset.armed = "1"; del.textContent = "再按一次確認刪除";
+        });
+        row.append(del);
+        li.append(row);
+      } else if (revealed.has(it.id)) {
+        const box = el("div", { class: "reveal" });
+        box.append(el("p", { class: "small muted" }, "請到 IG 私訊對方。本站不參與後續聯絡，也無法替物品狀況把關。"));
+        const c = el("p", { class: "contact" }, (it.contactType === "IG" || !it.contactType ? "IG " : it.contactType + "：") + (it.contact || ""));
+        box.append(c);
+        const row = el("div", { class: "actions" });
+        const handle = (it.contact || "").replace(/^@/, "");
+        if ((it.contactType === "IG" || !it.contactType) && /^[A-Za-z0-9._]{1,30}$/.test(handle)) {
+          row.append(el("a", { href: "https://www.instagram.com/" + handle + "/", target: "_blank", rel: "noopener" }, "打開對方的 IG"));
+        }
+        const cb = el("button", { type: "button", class: "ghost" }, "複製帳號");
+        const st = el("span", { class: "status", role: "status" });
+        cb.addEventListener("click", () => copy(it.contact || "", null, st));
+        row.append(cb, st); box.append(row);
+        li.append(box);
+      } else {
+        const want = el("button", { type: "button" }, "我想要");
+        const confirmBox = el("div", { class: "reveal" }); confirmBox.hidden = true;
+        const lab = el("label", { class: "check" });
+        const chk = el("input", { type: "checkbox" });
+        lab.append(chk, document.createTextNode("我看過上面的「交換前請先看」，會約在安全的地方，拿到支架會先請專業人員確認。"));
+        const go = el("button", { type: "button" }, "顯示對方的 IG"); go.disabled = true;
+        chk.addEventListener("change", () => { go.disabled = !chk.checked; });
+        go.addEventListener("click", () => { revealed.add(it.id); renderGifts(); });
+        confirmBox.append(lab, go);
+        want.addEventListener("click", () => { want.hidden = true; confirmBox.hidden = false; chk.focus(); });
+        const row = el("div", { class: "actions" }); row.append(want);
+        li.append(row, confirmBox);
+      }
+      list.append(li);
+    });
+  }
+  $("g-filter-city").addEventListener("change", renderGifts);
+  $("g-filter-cat").addEventListener("change", renderGifts);
+
+  let giftBusy = false;
+  async function editMine(itemId, fn, okText) {
+    if (!db || !myId || giftBusy) return;
+    giftBusy = true;
+    try {
+      const ref = db.doc("gifts/" + myId);
+      const snap = await ref.get();
+      const items = ((snap.exists && snap.data().items) || []).map((x) => Object.assign({}, x));
+      const next = items.map((x) => (x.id === itemId ? fn(x) : x)).filter(Boolean);
+      await ref.set({ items: next });
+      setStatus(giftStatus, okText, "ok");
+    } catch (e) { setStatus(giftStatus, "沒有更新成功，請稍後再試。", "err"); }
+    finally { giftBusy = false; }
+  }
+
+  giftForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const it = {
+      category: $("g-cat").value, condition: $("g-cond").value,
+      name: $("g-name").value.trim().slice(0, 60), size: $("g-size").value.trim().slice(0, 30),
+      city: $("g-city").value,
+      deliver: (giftForm.querySelector('input[name="deliver"]:checked') || {}).value || "",
+      contactType: "IG", contact: $("g-contact").value.trim().replace(/^@+/, ""),
+    };
+    if (it.contact) it.contact = "@" + it.contact;
+    const missing = [];
+    if (!it.category) missing.push("類別");
+    if (!it.condition) missing.push("狀況");
+    if (!it.name) missing.push("物品說明");
+    if (!it.city) missing.push("縣市");
+    if (!it.deliver) missing.push("交付方式");
+    if (!it.contact) missing.push("IG 帳號");
+    if (missing.length) return setStatus(giftStatus, "還差：" + missing.join("、"), "err");
+    if (!/^@[A-Za-z0-9._]{1,30}$/.test(it.contact)) return setStatus(giftStatus, "IG 帳號只能有英文、數字、底線和句點。", "err");
+    if (!$("g-free").checked) return setStatus(giftStatus, "請勾選確認這是免費贈送。", "err");
+    if (/\$|元|塊|售|賣|價/.test(it.name + it.size)) return setStatus(giftStatus, "這裡只開放免費贈送，說明裡請不要寫價格。", "err");
+    if (!db || !myId || canWrite === false) return setStatus(giftStatus, "這個預覽版目前只開放受邀的人刊登。", "err");
+    if (giftBusy) return;
+    giftBusy = true; giftSubmit.disabled = true; setStatus(giftStatus, "刊登中…");
+    try {
+      const ref = db.doc("gifts/" + myId);
+      const snap = await ref.get();
+      const items = ((snap.exists && snap.data().items) || []).map((x) => Object.assign({}, x));
+      if (items.filter((x) => x.status !== "given").length >= 10) throw { code: "too_many" };
+      items.push(Object.assign(it, { id: "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), postedAt: Date.now(), status: "open" }));
+      await ref.set({ items });
+      setStatus(giftStatus, "刊登好了，謝謝你。送出後記得回來按「標示為已送出」。", "ok");
+      giftForm.reset();
+    } catch (err) {
+      if (err && err.code === "too_many") setStatus(giftStatus, "一個人最多同時刊登 10 件，先把送出的標示起來吧。", "err");
+      else if (err && (err.code === "invalid_argument" || err.code === "not_granted")) setStatus(giftStatus, "這個預覽版目前只開放受邀的人刊登。", "err");
+      else setStatus(giftStatus, "沒有刊登成功，請稍後再試。", "err");
+    } finally { giftBusy = false; giftSubmit.disabled = false; }
+  });
+
+  renderGifts();
+
+  // ---------------- 打勾清單（只存在這台裝置） ----------------
+  const CK = "acl-map-checks";
+  let checks = {};
+  try { checks = JSON.parse(localStorage.getItem(CK) || "{}") || {}; } catch (e) { checks = {}; }
+  const saveChecks = () => { try { localStorage.setItem(CK, JSON.stringify(checks)); } catch (e) {} };
+  ["prep", "claims", "pt"].forEach((sec) => {
+    const section = $(sec);
+    const boxes = [];
+    section.querySelectorAll(".block ul").forEach((ul, ui) => {
+      ul.classList.add("checklist");
+      [...ul.children].forEach((li, i) => {
+        const key = sec + ":" + ui + ":" + i;
+        const label = el("label");
+        const box = el("input", { type: "checkbox", id: "ck-" + sec + "-" + ui + "-" + i });
+        box.checked = !!checks[key];
+        const span = el("span");
+        while (li.firstChild) span.append(li.firstChild);
+        label.append(box, span); li.append(label);
+        box.addEventListener("change", () => { if (box.checked) checks[key] = 1; else delete checks[key]; saveChecks(); update(); });
+        boxes.push(box);
+      });
+    });
+    const prog = el("div", { class: "progress", "aria-live": "polite" });
+    const count = el("span", { class: "count" });
+    const track = el("div", { class: "bar-track" }), fill = el("div", { class: "bar-fill" });
+    track.append(fill);
+    const reset = el("button", { type: "button", class: "link" }, "全部取消勾選");
+    reset.addEventListener("click", () => { boxes.forEach((b) => { b.checked = false; }); Object.keys(checks).filter((k) => k.startsWith(sec + ":")).forEach((k) => delete checks[k]); saveChecks(); update(); });
+    prog.append(count, track, reset);
+    const note = el("p", { class: "small muted" }, "勾選只會記在你這台裝置上，不會上傳。");
+    section.querySelector("h2").after(prog, note);
+    function update() {
+      const done = boxes.filter((b) => b.checked).length;
+      count.textContent = "已完成 " + done + " / " + boxes.length;
+      fill.style.width = (boxes.length ? (done / boxes.length) * 100 : 0) + "%";
+    }
+    update();
+  });
+
+  // ---------------- 傷友留言牆 ----------------
+  let reportDocs = [], wallDocs = [], isOwner = false;
+  const STAGE_NAME = { pre: "術前", w0: "術後 0–2 週", w2: "術後 2–6 週", w6: "術後 6–12 週", m3: "術後 3–6 個月", m9: "9 個月以上", "": "都可以" };
+  function pick(arr, n) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+    return a.slice(0, n);
+  }
+  let wallShown = {};
+  function renderWall() {
+    const shown = wallDocs.filter((w) => !w.hidden && w.text);
+    document.querySelectorAll(".wall").forEach((box) => {
+      const st = box.dataset.stage;
+      const pool = shown.filter((w) => w.stage === st || !w.stage);
+      if (!pool.length) { box.hidden = true; box.replaceChildren(); return; }
+      const keep = (wallShown[st] || []).filter((id) => pool.some((w) => w.id === id));
+      const ids = keep.length ? keep : pick(pool, 2).map((w) => w.id);
+      wallShown[st] = ids;
+      box.replaceChildren(el("p", { class: "wall-label" }, "傷友留給這個階段的你"));
+      ids.forEach((id) => { const w = pool.find((x) => x.id === id); if (w) box.append(el("blockquote", null, w.text)); });
+      if (pool.length > ids.length) {
+        const more = el("button", { type: "button", class: "link" }, "換一句");
+        more.addEventListener("click", () => { wallShown[st] = pick(pool, 2).map((w) => w.id); renderWall(); });
+        box.append(more);
+      }
+      box.hidden = false;
+    });
+  }
+  function renderPending() {
+    const panel = $("ownerPanel");
+    if (!isOwner) { panel.hidden = true; return; }
+    const decided = new Set(wallDocs.map((w) => w.id));
+    const pend = reportDocs.filter((x) => x.r && x.r.note && x.r.noteConsent && !decided.has(x.id));
+    const list = $("pendingList"); list.replaceChildren();
+    panel.hidden = false;
+    if (!pend.length) { list.append(el("li", { class: "small muted" }, "目前沒有待審核的留言。")); return; }
+    pend.forEach((x) => {
+      const li = el("li");
+      li.append(el("blockquote", null, x.r.note), el("p", { class: "small muted" }, "想送給：" + (STAGE_NAME[x.r.noteStage || ""] || "都可以")));
+      const row = el("div", { class: "actions" });
+      const ok = el("button", { type: "button" }, "公開");
+      const no = el("button", { type: "button", class: "ghost" }, "不公開");
+      const st = el("span", { class: "status", role: "status" });
+      const decide = async (hidden) => {
+        ok.disabled = no.disabled = true;
+        try { await db.doc("wall/" + x.id).set({ text: hidden ? "" : x.r.note, stage: x.r.noteStage || "", hidden, decidedAt: Date.now() }); }
+        catch (e) { setStatus(st, "沒有成功，請再試一次。", "err"); ok.disabled = no.disabled = false; }
+      };
+      ok.addEventListener("click", () => decide(false));
+      no.addEventListener("click", () => decide(true));
+      row.append(ok, no, st); li.append(row); list.append(li);
+    });
+  }
+
+  // ---------------- 陪自己走的小工具（只存在這台裝置） ----------------
+  const TK = "acl-map-tools";
+  let tools = { team: {}, log: [], fear: [] };
+  try { tools = Object.assign(tools, JSON.parse(localStorage.getItem(TK) || "{}") || {}); } catch (e) {}
+  const saveTools = () => { try { localStorage.setItem(TK, JSON.stringify(tools)); } catch (e) {} };
+  const TEAM = [
+    ["emo", "聽我說話的人", "心情不好時可以傾訴的人"],
+    ["help", "能實際幫忙的人", "接送回診、幫忙買飯、陪住院"],
+    ["info", "給我專業建議的人", "醫師、物理治療師"],
+    ["cheer", "一起加油的人", "傷友、一起復健的朋友"],
+  ];
+  const grid = $("teamGrid");
+  TEAM.forEach(([k, name, hint]) => {
+    const card = el("div", { class: "team-card" });
+    const id = "team-" + k;
+    const lab = el("label", { for: id }); lab.append(el("strong", null, name), el("span", { class: "small muted" }, hint));
+    const inp = el("input", { type: "text", id, maxlength: "40", placeholder: "寫下名字" });
+    inp.value = (tools.team && tools.team[k]) || "";
+    let t;
+    inp.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { tools.team[k] = inp.value.trim(); saveTools(); teamTip(); }, 400); });
+    card.append(lab, inp); grid.append(card);
+  });
+  function teamTip() {
+    const empty = TEAM.filter(([k]) => !(tools.team[k] || "").trim()).map(([, n]) => n);
+    $("teamTip").textContent = empty.length === TEAM.length ? "從最容易的一格開始寫就好。"
+      : empty.length ? "「" + empty.join("」「") + "」還空著。試著主動找一個人補上，開口求助不是軟弱。"
+      : "四格都有人了。記得，你不是一個人在復健。";
+  }
+  teamTip();
+
+  function renderLog() {
+    const list = $("logList"); list.replaceChildren();
+    if (!tools.log.length) { list.append(el("li", { class: "small muted" }, "還沒有紀錄。第一筆可以很小，例如「今天冰敷完腫消了一點」。")); return; }
+    tools.log.slice().reverse().forEach((x) => {
+      const li = el("li");
+      li.append(el("span", { class: "log-date" }, x.d), el("span", { class: "log-text" }, x.t));
+      const del = el("button", { type: "button", class: "link", "aria-label": "刪除這筆" }, "刪除");
+      del.addEventListener("click", () => { tools.log = tools.log.filter((y) => y !== x); saveTools(); renderLog(); });
+      li.append(del); list.append(li);
+    });
+  }
+  $("logForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = $("logText").value.trim(); if (!v) return;
+    const d = new Date(); tools.log.push({ d: (d.getMonth() + 1) + "/" + d.getDate(), t: v.slice(0, 80) });
+    if (tools.log.length > 200) tools.log.shift();
+    saveTools(); $("logText").value = ""; renderLog();
+  });
+  renderLog();
+
+  $("fearScore").addEventListener("input", () => { $("fearOut").textContent = $("fearScore").value; });
+  function renderFear() {
+    const list = $("fearList"); list.replaceChildren();
+    if (!tools.fear.length) { list.append(el("li", { class: "small muted empty-li" }, "還沒有動作。先寫一個你現在不太敢做的動作。")); return; }
+    tools.fear.slice().sort((a, b) => a.s - b.s).forEach((x) => {
+      const li = el("li");
+      const bar = el("span", { class: "fear-bar" }); bar.style.setProperty("--w", (x.s * 10) + "%");
+      li.append(el("span", { class: "fear-name" }, x.t), bar, el("span", { class: "fear-num" }, x.s + " / 10"));
+      const del = el("button", { type: "button", class: "link", "aria-label": "刪除這個動作" }, "刪除");
+      del.addEventListener("click", () => { tools.fear = tools.fear.filter((y) => y !== x); saveTools(); renderFear(); });
+      li.append(del); list.append(li);
+    });
+  }
+  $("fearForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = $("fearText").value.trim(); if (!v) return;
+    tools.fear.push({ t: v.slice(0, 40), s: Number($("fearScore").value) });
+    if (tools.fear.length > 30) tools.fear.shift();
+    saveTools(); $("fearText").value = ""; renderFear();
+  });
+  renderFear();
+
+  // ---------------- 跳到我的階段 ----------------
+  function openStage(id) {
+    const li = document.getElementById(id);
+    if (!li || !li.classList.contains("phase")) return;
+    li.querySelectorAll("details").forEach((d) => { d.open = true; });
+    li.classList.remove("flash"); void li.offsetWidth; li.classList.add("flash");
+  }
+  document.querySelectorAll(".stage-links a").forEach((a) => {
+    a.addEventListener("click", () => openStage(a.getAttribute("href").slice(1)));
+  });
+  if (/^#stage-/.test(location.hash)) openStage(location.hash.slice(1));
+
+  // ---------------- 連線 ----------------
+  (async () => {
+    try {
+      if (!window.claude || !window.claude.use) return;
+      db = await window.claude.use("db");
+      user = await window.claude.use("user");
+      if (user) { myId = await user.id(); canWrite = await user.can("data.write"); isOwner = await user.isOwner(); }
+    } catch (e) { db = null; }
+    if (!db) return;
+    db.collection("reports").limit(1000).onSnapshot((snap) => {
+      reportDocs = snap.docs.filter((d) => d.exists).map((d) => ({ id: d.id, r: d.data() }));
+      renderStats(reportDocs.map((x) => x.r));
+      renderPending();
+    }, () => {});
+    db.collection("wall").limit(1000).onSnapshot((snap) => {
+      wallDocs = snap.docs.filter((d) => d.exists).map((d) => Object.assign({ id: d.id }, d.data()));
+      renderWall(); renderPending();
+    }, () => {});
+    db.collection("gifts").limit(1000).onSnapshot((snap) => {
+      giftDocs = snap.docs.map((d) => ({ ownerId: d.id, items: (d.data() || {}).items || [] }));
+      renderGifts();
+    }, () => {});
+  })();
+})();
+</script>
