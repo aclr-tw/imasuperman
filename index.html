@@ -1,9 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ACL 術後地圖</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="術後的每一天，你可能都在問：我這樣正常嗎？ACL 前十字韌帶重建從術前到回場，每個階段常見的狀況、術前準備、手術費用、理賠準備，由過來人整理。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ACL 術後地圖｜我這樣正常嗎？">
+<meta property="og:description" content="術後的每一天，你可能都在問：我這樣正常嗎？ACL 前十字韌帶重建從術前到回場，每個階段常見的狀況、術前準備、手術費用、理賠準備，由過來人整理。">
+<meta property="og:locale" content="zh_TW">
+<meta name="theme-color" content="#e8f1fe">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;500;700;900&display=swap">
 <style>
+/* 基本設定：手機安全區域、去除預設邊距、hidden 一律隱藏 */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
 /* Layout: one plain column on white. The site's own monochrome blue (sky
    #B5D2FC through navy #0E1E33) is the main visual: deep navy text, navy for
    what you can tap, sky blue for highlights. Gray-blue sets the "mood" notes
@@ -238,7 +253,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .progress .bar-fill { transition: none; } }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header>
     <p class="eyebrow">ACL 術後地圖</p>
@@ -1308,3 +1324,5 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   })();
 })();
 </script>
+</body>
+</html>
