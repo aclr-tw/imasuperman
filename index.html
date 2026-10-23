@@ -891,6 +891,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <label class="chip"><input type="checkbox" name="dev" value="PRP"><span>PRP 高濃度血小板</span></label>
             <label class="chip"><input type="checkbox" name="dev" value="羊膜"><span>羊膜</span></label>
             <label class="chip"><input type="checkbox" name="dev" value="玻尿酸"><span>玻尿酸</span></label>
+            <label class="chip"><input type="checkbox" name="dev" value="無術中注射"><span>無</span></label>
           </div>
           <div class="chips">
             <label class="chip"><input type="checkbox" name="dev" value="其他"><span>其他</span></label>
@@ -1504,6 +1505,16 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     });
     form.addEventListener("reset", () => setTimeout(fillHosp, 0));
     fillHosp();
+  })();
+
+  // ---------------- 術中注射：勾「無」時取消其他注射，反之亦然 ----------------
+  (function () {
+    const INJ = ["PRP", "羊膜", "玻尿酸"];
+    const none = form.querySelector('input[name="dev"][value="無術中注射"]');
+    const others = INJ.map((v) => form.querySelector('input[name="dev"][value="' + v + '"]')).filter(Boolean);
+    if (!none) return;
+    none.addEventListener("change", () => { if (none.checked) others.forEach((o) => { o.checked = false; }); });
+    others.forEach((o) => o.addEventListener("change", () => { if (o.checked) none.checked = false; }));
   })();
 
   // ---------------- 勾「其他」時出現填寫欄 ----------------
