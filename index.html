@@ -96,7 +96,7 @@ section + section { border-top: 1px solid var(--line); margin-top: 40px; }
 .when small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
 .phase .body { display: grid; gap: 6px; min-width: 0; }
 .phase ul { margin: 0; padding-left: 1.1em; }
-.goal { font-size: 13px; color: var(--muted); }
+.goal { font-size: 14px; color: var(--fg); }
 details.normal { margin-top: 4px; background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
 details.normal > summary { font-size: 14px; font-weight: 700; color: var(--accent-strong); }
 details.normal ul { margin: 6px 0 4px; padding-left: 1.1em; }
@@ -152,9 +152,9 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 /* Stats */
 .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .kpi { display: grid; gap: 0; background: var(--soft); border-radius: 8px; padding: 10px 12px; }
-.kpi .v { font-size: 24px; font-weight: var(--display-weight); font-variant-numeric: tabular-nums; line-height: 1.3; color: var(--accent-strong); }
+.kpi .v { font-size: clamp(18px, 5.4vw, 24px); font-weight: var(--display-weight); font-variant-numeric: tabular-nums; line-height: 1.3; color: var(--accent-strong); }
 .kpi .k { font-size: 12px; color: var(--muted); }
-@media (max-width: 400px) { .kpis { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 330px) { .kpis { grid-template-columns: 1fr 1fr; } }
 .tablebox { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-size: 14px; }
 th, td { text-align: left; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -163,21 +163,6 @@ th { font-size: 12px; color: var(--muted); font-weight: 500; }
 .empty { background: var(--soft); border-radius: 8px; padding: 16px; display: grid; gap: 4px; color: var(--muted); }
 .empty h3 { color: var(--fg); }
 
-/* Gifts */
-.safety { background: var(--warn-soft); border-radius: 8px; padding: 14px 16px; display: grid; gap: 6px; }
-.safety h3 { color: var(--warn-fg); }
-.safety ul { margin: 0; padding-left: 1.1em; }
-.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.filters select { width: auto; min-width: 140px; }
-.gifts { display: grid; gap: 0; list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-.gift { padding-block: 14px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
-.gift .top { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; justify-content: space-between; }
-.gift .meta { font-size: 13px; color: var(--muted); }
-.gift .badge { font-size: 12px; background: var(--accent-soft); color: var(--accent-strong); border-radius: 4px; padding: 1px 8px; }
-.gift.done { opacity: .55; }
-.reveal { background: var(--accent-soft); border-radius: 8px; padding: 12px; display: grid; gap: 8px; }
-.contact { font-weight: 700; font-size: 16px; user-select: all; word-break: break-all; }
-.gift-form { margin-top: 4px; }
 details > summary { cursor: pointer; font-weight: 700; list-style: none; }
 details > summary::-webkit-details-marker { display: none; }
 details > summary::before { content: "+ "; }
@@ -209,12 +194,8 @@ details.mood ul { margin: 6px 0 6px; padding-left: 1.1em; }
 details.mood .tip { font-size: 14px; border-top: 1px dashed #b1bbc9; padding-top: 6px; }
 .wall { border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; display: grid; gap: 6px; }
 .wall-label { font-size: 12px; font-weight: 700; color: var(--accent-strong); letter-spacing: .04em; }
-.wall blockquote, .pending blockquote { margin: 0; font-size: 14px; }
+.wall blockquote { margin: 0; font-size: 14px; }
 .wall blockquote::before { content: "「"; } .wall blockquote::after { content: "」"; }
-.owner { border: 1px dashed var(--accent); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; }
-.pending { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.pending li { display: grid; gap: 4px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
-.pending li:last-child { border-bottom: 0; }
 .helpline { background: var(--mood-soft); border-radius: 8px; padding: 10px 12px; }
 .tool { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 10px; }
 .tool .tip { font-size: 14px; color: var(--mood-fg); background: var(--mood-soft); border-radius: 8px; padding: 8px 12px; }
@@ -249,9 +230,9 @@ details.mood .tip { font-size: 14px; border-top: 1px dashed #b1bbc9; padding-top
 .stage-links a b { font-size: 16px; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .stage-links a:hover { background: var(--highlight); }
 .phase { scroll-margin-top: 64px; }
-.phase.flash { animation: flash 1.6s ease-out; }
-@keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
-@media (prefers-reduced-motion: reduce) { .phase.flash { animation: none; } }
+.phase { border-radius: 8px; transition: background-color 2s ease-out, box-shadow 2s ease-out; }
+.phase.lit { background-color: rgba(181, 210, 252, .8); box-shadow: 0 0 0 8px rgba(181, 210, 252, .8); transition: none; }
+@media (prefers-reduced-motion: reduce) { .phase { transition: none; } }
 .small, .muted.small, .goal, .tag { font-weight: 500; }
 .chip-groups { display: grid; gap: 6px; }
 .chip-group { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .04em; margin-top: 4px; }
@@ -273,6 +254,57 @@ details.mood .tip { font-size: 14px; border-top: 1px dashed #b1bbc9; padding-top
 .feedback { color: var(--fg); background: var(--accent-soft); border-radius: 12px; padding: 16px; display: grid; gap: 8px; margin-bottom: 12px; font-size: 15px; }
 .mail-row { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
 .mail { font-weight: 700; word-break: break-all; user-select: all; color: var(--accent-strong); }
+button.link:hover { background: none; color: var(--fg); }
+.tip-box { font-size: 14px; color: var(--accent-strong); background: var(--accent-soft); border-radius: 8px; padding: 8px 12px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.card { display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; background: var(--bg); min-width: 0; }
+.card h3 { font-size: 17px; }
+.card-desc { font-size: 14px; color: var(--muted); }
+.card-peek { margin: 2px 0 0; padding-left: 1.1em; font-size: 14px; display: grid; gap: 2px; }
+.card-peek:empty { display: none; }
+.card-peek li { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-foot { margin-top: auto; padding-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-count { font-size: 13px; color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+button.card-more { background: var(--bg); color: var(--accent-strong); border: 1px solid var(--highlight); padding: 6px 14px; font-size: 14px; }
+button.card-more::after { content: " →"; }
+button.card-more:hover { background: var(--highlight); border-color: var(--highlight); }
+button.link-btn { justify-self: start; background: none; border: 0; padding: 4px 0; color: var(--accent-strong); font-size: 14px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+button.link-btn::after { content: " →"; }
+button.link-btn:hover { background: none; color: var(--accent); }
+.drawer-src { display: grid; gap: 12px; }
+.drawer-src .sub { font-size: 14px; font-weight: 700; color: var(--accent); margin-top: 6px; }
+.drawer-src ul { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; }
+.drawer-src ul.checklist li { display: grid; gap: 2px; }
+.drawer-src ul.checklist .link-btn { margin-left: 28px; }
+.note-warn { font-size: 14px; color: var(--warn-fg); background: var(--warn-soft); border-radius: 8px; padding: 10px 12px; }
+.fix { display: grid; gap: 6px; border-left: 3px solid var(--highlight); padding: 2px 0 2px 12px; }
+.fix h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.fix-label { font-size: 13px; font-weight: 700; color: var(--accent); }
+dialog.drawer { position: fixed; inset: 0 0 0 auto; margin: 0; padding: 0; border: 0; width: min(480px, 100%); max-width: 100%; height: 100%; max-height: 100%; background: var(--bg); color: var(--fg); box-shadow: -8px 0 32px rgba(14, 30, 51, .18); flex-direction: column; }
+dialog.drawer[open] { display: flex; }
+dialog.drawer::backdrop { background: rgba(14, 30, 51, .45); }
+.drawer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line); padding: calc(14px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) 12px 16px; }
+.drawer-titles { display: grid; gap: 2px; min-width: 0; }
+.drawer-head h2 { font-size: 20px; }
+.drawer-sub { font-size: 13px; color: var(--muted); font-weight: 500; }
+button.drawer-close { flex: 0 0 auto; background: var(--bg); color: var(--accent-strong); border: 1px solid var(--highlight); padding: 6px 14px; }
+button.drawer-close:hover { background: var(--highlight); border-color: var(--highlight); }
+.drawer-body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(28px + env(safe-area-inset-bottom, 0px)) 16px; }
+body:has(dialog[open]) { overflow: hidden; }
+@media (prefers-reduced-motion: no-preference) { dialog.drawer[open] { animation: drawer-in .25s ease-out; } }
+@keyframes drawer-in { from { transform: translateX(100%); } to { transform: none; } }
+.pace { background: var(--soft); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
+.pace h3 { font-size: 16px; color: var(--accent-strong); }
+.pace p { font-size: 15px; }
+.pace-why > summary { font-size: 14px; font-weight: 700; color: var(--accent); }
+.pace-why ul { margin: 6px 0; padding-left: 1.1em; display: grid; gap: 4px; font-size: 15px; }
+.goal-label { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent-ink); background: var(--accent); border-radius: 4px; padding: 0 6px; margin-right: 6px; }
+.author { display: flex; gap: 14px; align-items: flex-start; padding: 4px 0 16px; color: var(--fg); font-size: 15px; }
+.author-photo { flex: 0 0 auto; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--highlight); }
+.author-text { display: grid; gap: 6px; min-width: 0; }
+.author-text a { font-weight: 700; display: inline-block; overflow-wrap: anywhere; }
+.further { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .progress .bar-fill { transition: none; } }
@@ -285,12 +317,12 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     <h1><span class="lead">術後的你，可能每天都在問：</span><span class="q">「我這樣正常嗎？」</span></h1>
     <div class="intro">
       <p>腫成這樣正常嗎？膝蓋有聲音正常嗎？角度一直上不去正常嗎？離回診還很久，只能上網問問別人。</p>
-      <blockquote class="voice">「如果有人跟我說正常就好了吧。」<span>曾經的術後我，是這麼想的。</span></blockquote>
+      <blockquote class="voice">「如果有人跟我說正常就好了吧。」<span>曾經術後的我，是這麼想的。</span></blockquote>
       <p>以下整理每個階段常見的狀況、術前準備，以及傷友們的實際花費。</p>
     </div>
     <div class="stage-pick">
       <p class="stage-label">你現在在哪個階段？</p>
-      <p class="stage-hint">點一下，直接看那個階段的常見狀況</p>
+      <p class="stage-hint">時間只是大概，點一下看那個階段的常見狀況</p>
       <div class="stage-links">
         <a href="#stage-pre"><small>術前</small><b>還沒開刀</b></a>
         <a href="#stage-w0"><small>術後</small><b>0–2 週</b></a>
@@ -306,11 +338,12 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     <a href="#timeline">術後時間軸</a>
     <a href="#tools">陪伴小工具</a>
     <a href="#prep">術前清單</a>
+    <a href="#ask">問醫生</a>
+    <a href="#learn">開跑評估</a>
     <a href="#report">費用回報</a>
     <a href="#stats">大家的數字</a>
     <a href="#claims">理賠準備</a>
     <a href="#pt">物治地圖</a>
-    <a href="#gifts">免費轉送</a>
     <a href="#resources">公開資料</a>
     <a href="#sources">資料來源</a>
   </nav>
@@ -319,6 +352,22 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     <h2>術後時間軸：每個階段中，什麼是正常？</h2>
     <p class="muted">這是一般常見的進度和狀況。每個人的手術內容、恢復速度都不同，<strong>請以你的醫師和物理治療師的建議為準。</strong></p>
     <span class="tag">內容審稿中：物理治療師</span>
+    <div class="pace">
+      <h3>每個人都有自己的時區，以是否達到階段性目標為準</h3>
+      <p>每個階段寫的週數，是很多人大約落在的時間，不是你一定要做到的期限。比起過了幾週，更重要的是有沒有達到那個階段的<b>過關目標</b>。卡在某個階段比較久很常見，不代表你比較差。</p>
+      <details class="pace-why">
+        <summary>為什麼每個人的進度差這麼多？</summary>
+        <ul>
+          <li><b>同時處理了半月板：</b>尤其是縫補，常會有比較久的不能踩地或角度限制</li>
+          <li><b>合併其他韌帶或軟骨的處置</b></li>
+          <li><b>移植物的種類</b>，以及取肌腱的位置</li>
+          <li><b>每位醫師的術後規範不同：</b>同一個時間點，有人可以踩地、有人還不行</li>
+          <li><b>術前的肌力和角度</b>、年齡、工作和運動需求</li>
+          <li><b>腫脹、發炎</b>這類狀況，也可能讓進度暫停一陣子</li>
+        </ul>
+        <p class="small muted">如果你的進度和這裡寫的不一樣，請以你的醫師交代為準；擔心的話，就在回診時問。</p>
+      </details>
+    </div>
     <ol class="timeline">
       <li class="phase" id="stage-pre">
         <div class="when">術前</div>
@@ -329,7 +378,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <li>練習大腿股四頭肌出力</li>
             <li>和醫師確認移植物種類、自費項目、住院天數</li>
           </ul>
-          <p class="goal">目標：膝蓋伸直、腫脹消退、走路正常</p>
+          <p class="goal"><span class="goal-label">過關目標</span>膝蓋伸直、腫脹消退、走路正常</p>
           <details class="normal"><summary>這時候常見的狀況</summary>
             <ul>
               <li>開刀前幾天開始緊張、睡不好，很多人都這樣，追追劇、打遊戲，轉移注意力吧！</li>
@@ -352,7 +401,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <li>練伸直和大腿出力</li>
             <li>依醫囑使用拐杖和支架</li>
           </ul>
-          <p class="goal">目標：伸直 0°，按照醫囑凹角度</p>
+          <p class="goal"><span class="goal-label">過關目標</span>伸直 0°，按照醫囑凹角度</p>
           <details class="normal"><summary>這時候常見的狀況</summary>
             <ul>
               <li>膝蓋很腫，瘀青慢慢擴散至小腿、腳踝</li>
@@ -387,7 +436,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <li>練習不用拐杖、步態漸漸穩定
             </li>
           </ul>
-          <p class="goal">目標：按照醫囑凹角度、不用拐杖走路</p>
+          <p class="goal"><span class="goal-label">過關目標</span>按照醫囑凹角度、不用拐杖走路</p>
           <details class="normal"><summary>這時候常見的狀況</summary>
             <ul>
               <li>凹腳時又緊又痠，做完會痠痛一陣子</li>
@@ -412,7 +461,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <li>腿部肌力、單腳平衡訓練</li>
             <li>騎腳踏車、上下樓梯會越來越順</li>
           </ul>
-          <p class="goal">目標：日常活動不痛，單腳能站穩</p>
+          <p class="goal"><span class="goal-label">過關目標</span>日常活動不痛，單腳能站穩</p>
           <details class="normal"><summary>這時候常見的狀況</summary>
             <ul>
               <li>訓練完肌肉痠，隔天會好</li>
@@ -436,7 +485,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <li>治療師評估通過後，從直線慢跑開始</li>
             <li>逐步加入跳躍和敏捷訓練</li>
           </ul>
-          <p class="goal">目標：通過開跑評估</p>
+          <p class="goal"><span class="goal-label">過關目標</span>通過開跑評估</p>
+          <button type="button" class="link-btn" data-open="src-run">開跑前要通過哪些評估？</button>
           <details class="normal"><summary>這時候常見的狀況</summary>
             <ul>
               <li>跑完膝蓋微腫、痠，休息後消退</li>
@@ -459,7 +509,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
             <li>單腳跳躍、肌力測試，兩腳互相比較</li>
             <li>籃球、足球這類需要急停轉向的運動，通常建議至少 9 個月、且測試通過再回場。</li>
           </ul>
-          <p class="goal">常見標準：受傷腳的肌力達到另一腳的 90% 以上</p>
+          <p class="goal"><span class="goal-label">過關目標</span>常見標準：受傷腳的肌力達到另一腳的 90% 以上</p>
           <details class="normal"><summary>這時候常見的狀況</summary>
             <ul>
               <li>高強度運動後偶爾會腫</li>
@@ -555,16 +605,223 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
       <p>術後止痛常見的自費選項有神經阻斷、自控式止痛（PCA）、自費止痛針。開刀前可以先查你的醫院，或在麻醉諮詢時詢問。</p>
     </div>
 
-    <div class="block">
-      <h3>開刀前問醫生的問題清單</h3>
-      <p class="muted">從手術方式、自費項目、麻醉，一路到出院前要確認的事，我們正在整理成一份清單，完成後會放在這裡。</p>
+    <div class="cards">
+      <article class="card" data-src="src-pack-hosp">
+        <h3>住院包清單</h3>
+        <p class="card-desc">住院那幾天要帶的東西，依個人需求增減。</p>
+        <ul class="card-peek"></ul>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-pack-hosp">查看全部</button></div>
+      </article>
+      <article class="card" data-src="src-pack-home">
+        <h3>回家後的準備</h3>
+        <p class="card-desc">出院回家後，冰敷、洗澡、復健會用到的東西。</p>
+        <ul class="card-peek"></ul>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-pack-home">查看全部</button></div>
+      </article>
+    </div>
+
+    <div class="drawer-src" id="src-pack-hosp" data-title="住院包清單" hidden>
+      <p class="muted">傷友實際用過的物品，請依自己的狀況增減。例如需不需要尿布、能不能下床，可以先問醫院。</p>
+      <p class="sub">證件與生活用品</p>
+      <ul class="check" data-key="pack-hosp-1">
+        <li>健保卡、證件等重要物品</li>
+        <li>平板、充電線</li>
+        <li>保溫杯、個人餐具</li>
+        <li>牙刷牙膏、臉盆</li>
+        <li>耳塞（病房可能比較吵）</li>
+      </ul>
+      <p class="sub">衣物與清潔</p>
+      <ul class="check" data-key="pack-hosp-2">
+        <li>短褲、免洗內褲</li>
+        <li>濕紙巾、衛生紙</li>
+        <li>拋棄式洗臉巾、擦澡巾</li>
+        <li>擦澡用的沐浴乳、洗髮乳</li>
+        <li>塑膠手套（給照顧你的人用）</li>
+      </ul>
+      <p class="sub">如廁</p>
+      <ul class="check" data-key="pack-hosp-3">
+        <li>尿布</li>
+        <li>尿盆</li>
+        <li>拋棄式馬桶墊</li>
+      </ul>
+      <p class="sub">行動與冰敷</p>
+      <ul class="check" data-key="pack-hosp-4">
+        <li>術後膝支架</li>
+        <li>助行器或拐杖</li>
+        <li>輪椅（出院回家也用得到）</li>
+        <li>冰敷袋</li>
+      </ul>
+      <p class="small muted">輪椅、助行器、拐杖，可以先問開刀的醫院或各縣市輔具資源中心能不能借用。</p>
+    </div>
+
+    <div class="drawer-src" id="src-pack-home" data-title="回家後的準備" hidden>
+      <p class="muted">傷友實際用過的物品，請依自己的狀況增減。</p>
+      <p class="sub">冰敷與傷口</p>
+      <ul class="check" data-key="pack-home-1">
+        <li>冰敷袋 2 個（可以輪流用）</li>
+        <li>換藥用品：生理食鹽水、優碘、棉棒、紗布（依醫院的換藥指示）</li>
+        <li>瘀青藥膏（例如喜療妥）、除疤凝膠、矽膠貼片（使用前先問醫師或藥師）</li>
+      </ul>
+      <p class="sub">洗澡與如廁</p>
+      <ul class="check" data-key="pack-home-2">
+        <li>洗澡腳套（避免傷口碰水感染）</li>
+        <li>洗澡椅</li>
+        <li>乾洗髮噴霧、擦身體濕紙巾</li>
+        <li>尿布（還不能踩地的話）</li>
+        <li>馬桶旁加裝扶手</li>
+      </ul>
+      <p class="sub">行動</p>
+      <ul class="check" data-key="pack-home-3">
+        <li>四腳拐或助行器</li>
+      </ul>
+      <p class="sub">復健</p>
+      <ul class="check" data-key="pack-home-4">
+        <li>長彈力繩、彈力圈（視需要）</li>
+        <li>腳踝沙包（視需要）</li>
+        <li>筋膜槍、腿部按摩機、滾筒（什麼時候能用，先問治療師）</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="ask">
+    <h2>問醫生清單</h2>
+    <p class="muted">門診時間很短，一緊張就容易忘記問。把清單帶去，問完一項勾一項。</p>
+    <p class="tip-box">建議請陪病的家人或朋友一起聽，幫忙記下醫師的回答。</p>
+
+    <div class="cards">
+      <article class="card" data-src="src-ask-plan">
+        <h3>安排手術時</h3>
+        <p class="card-desc">手術方式、移植物、固定方式、自費項目。</p>
+        <ul class="card-peek"></ul>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-ask-plan">查看全部</button></div>
+      </article>
+      <article class="card" data-src="src-ask-anes">
+        <h3>麻醉諮詢時</h3>
+        <p class="card-desc">麻醉方式、止痛選擇、麻醉自費項目。</p>
+        <ul class="card-peek"></ul>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-ask-anes">查看全部</button></div>
+      </article>
+      <article class="card" data-src="src-ask-post">
+        <h3>手術後</h3>
+        <p class="card-desc">膝蓋裡面的狀況、下床和踩地的時間。</p>
+        <ul class="card-peek"></ul>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-ask-post">查看全部</button></div>
+      </article>
+      <article class="card" data-src="src-ask-out">
+        <h3>出院前</h3>
+        <p class="card-desc">支架角度、拆線、洗澡、回家後的注意事項。</p>
+        <ul class="card-peek"></ul>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-ask-out">查看全部</button></div>
+      </article>
+    </div>
+    <p class="small muted">清單由傷友整理，歡迎<a href="#feedback">來信補充</a>。每間醫院的做法不同，實際請以你的醫師說明為準。</p>
+
+    <div class="drawer-src" id="src-ask-plan" data-title="安排手術時要問" hidden>
+      <p class="sub">手術本身</p>
+      <ul class="check" data-key="ask-plan-1">
+        <li>手術方式：關節鏡，還是傳統開刀？</li>
+        <li>手術大概要多久？</li>
+        <li>要住院幾天？</li>
+        <li>依我的生活和工作，建議休息多久？</li>
+        <li>依我的運動、日常生活和工作需求，術後活動要注意什麼？</li>
+        <li>術後有沒有安排物理治療師衛教？</li>
+      </ul>
+      <p class="sub">移植物與固定</p>
+      <ul class="check" data-key="ask-plan-2">
+        <li>用自體還是異體肌腱？自體的話，取哪裡的肌腱？</li>
+        <li>異體肌腱要多少錢？醫院有沒有組織庫，可以省一些費用？</li>
+        <li>重建方式是單束還是雙束？</li>
+        <li>移植的肌腱用什麼固定？鈕扣還是骨釘？骨釘可以吸收嗎？</li>
+      </ul>
+      <p class="sub">半月板</p>
+      <ul class="check" data-key="ask-plan-3">
+        <li>半月板是切除還是縫補？</li>
+        <li>縫補可能超過健保給付的針數嗎？超過一針多少錢？</li>
+        <li>縫線是可吸收還是不可吸收的？</li>
+      </ul>
+      <p class="sub">其他自費項目</p>
+      <ul class="check" data-key="ask-plan-4">
+        <li>必要的耗材有哪些？例如關節鏡耗材、汽化棒、沖洗液</li>
+        <li>術中要不要打 PRP、羊膜，或加膠原蛋白敷料？各多少錢？</li>
+        <li>傷口用防水敷料嗎？</li>
+        <li>術後要準備膝支架嗎？醫院有沒有配合的廠商？</li>
+      </ul>
+    </div>
+
+    <div class="drawer-src" id="src-ask-anes" data-title="麻醉諮詢時要問" hidden>
+      <ul class="check" data-key="ask-anes">
+        <li>全身麻醉還是半身麻醉？</li>
+        <li>有過敏史的話，一定要主動告訴麻醉醫師</li>
+        <li>止暈、止吐藥要自費嗎？</li>
+        <li>術後止痛有哪些選擇？健保、自費、長效型、自控式（PCA）等，各醫院不同</li>
+        <li>要不要做神經阻斷？費用多少？</li>
+        <li>需要保暖毯嗎？</li>
+        <li>全身麻醉的話，還有哪些自費項目？例如麻醉深度監測（各醫院不同）</li>
+      </ul>
+      <p class="note-warn">如果術中有打 PRP，請和醫師確認止痛藥要避開哪些，例如 NSAIDs 類的消炎止痛藥。</p>
+    </div>
+
+    <div class="drawer-src" id="src-ask-post" data-title="手術後要問" hidden>
+      <ul class="check" data-key="ask-post">
+        <li>開進去之後，膝關節裡面的狀況如何？</li>
+        <li>半月板受損的位置在哪裡？是在有血液供應的區域嗎？</li>
+        <li>半月板縫了幾針，還是修剪掉？修剪了多少？</li>
+        <li>軟骨和韌帶的狀況如何？</li>
+        <li>多久可以下床？</li>
+        <li>現在可以踩地、承重嗎？</li>
+        <li>現在可以做哪些復健？</li>
+      </ul>
+    </div>
+
+    <div class="drawer-src" id="src-ask-out" data-title="出院前要確認" hidden>
+      <ul class="check" data-key="ask-out">
+        <li>回家後支架要開到幾度？還是只能維持 0 度？</li>
+        <li>有處理半月板的話：回家後開刀腳可以承重多少？</li>
+        <li>什麼時候回診拆線？</li>
+        <li>傷口可以碰水、洗澡嗎？</li>
+        <li>什麼情況要換藥？</li>
+        <li>回診前，哪些動作要避免？可以做哪些復健運動？</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="learn">
+    <h2>開跑評估</h2>
+    <p class="muted">「術後幾個月可以跑？」是最常被問的問題之一。答案不只看時間，而是看身體準備好了沒。這裡整理治療師常見的評估方向，實際請以你的治療師為準。</p>
+    <span class="tag">內容審稿中：物理治療師</span>
+    <div class="cards">
+      <article class="card">
+        <h3>什麼時候可以開始跑步？</h3>
+        <p class="card-desc">不只看過了幾個月，治療師通常會從膝蓋、肌力、動作控制和心理四個方向評估。</p>
+        <div class="card-foot"><span class="card-count"></span><button type="button" class="card-more" data-open="src-run">查看全部</button></div>
+      </article>
+    </div>
+
+    <div class="drawer-src" id="src-run" data-title="什麼時候可以開始跑步？" hidden>
+      <p>能不能開始跑，不是只看過了幾個月。物理治療師通常會從下面四個方向評估，用的工具和標準，每位治療師、每份研究都不太一樣。</p>
+      <ul>
+        <li><b>膝蓋本身：</b>沒有明顯積水和腫脹、能完全伸直、彎曲角度足夠，走路不痛不跛。</li>
+        <li><b>肌力：</b>受傷腳和好腳的力量差不多，特別是大腿前側。</li>
+        <li><b>動作控制：</b>單腳蹲、單腳跳和著地時，膝蓋不往內夾、身體穩得住。</li>
+        <li><b>心理準備：</b>對落地和衝擊沒有過度害怕。可以先用<a href="#tool-fear">「害怕的動作排排看」</a>整理自己怕的動作。</li>
+      </ul>
+      <p>開始跑之後，通常也是從平整的地面、跑走交替開始，再看隔天膝蓋的反應慢慢增加。</p>
+      <p class="note-warn"><strong>這些測試需要專業評估，請不要自己判斷。什麼時候可以跑、怎麼跑，請和你的醫師與物理治療師討論。</strong></p>
+      <div class="further">
+        <p class="sub">想更深入了解的話</p>
+        <ul>
+          <li><a href="https://bjsm.bmj.com/content/52/22/1437.full" target="_blank" rel="noopener">Rambaud 等人（2018）：ACL 重建術後恢復跑步的標準，回顧研究</a></li>
+          <li><a href="https://pubmed.ncbi.nlm.nih.gov/36731908/" target="_blank" rel="noopener">Kotsifaki 等人（2023）：Aspetar ACL 重建術後復健臨床指引</a></li>
+        </ul>
+        <p class="small muted">以上為英文文獻，可以帶去和你的治療師討論。</p>
+      </div>
     </div>
   </section>
 
   <section id="report">
     <h2>匿名回報手術費用</h2>
     <p>比價網只查得到單項醫材的價格。你的回報能讓下一個人知道，整個手術實際花費。</p>
-    <p class="privacy">所有回報都是匿名、去識別化的。手術時間只記年份，同一間醫院累積 3 筆以上才會公開數字。</p>
+    <p class="privacy">所有回報都是匿名、去識別化的。手術時間只記年份，同一間醫院累積 3 筆以上才會公開數字。回報會存在站長的 Google 試算表，網站只顯示統計結果。</p>
 
     <form id="reportForm" novalidate>
       <fieldset>
@@ -685,12 +942,13 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
         <label class="check"><input type="checkbox" id="f-noteok"> 同意匿名公開這段話。審核後會出現在時間軸對應的階段，讓正在那裡的人看見。</label>
       </fieldset>
 
+      <div class="hp" aria-hidden="true"><label for="f-website">請勿填寫</label><input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></div>
       <div class="actions">
         <button type="submit" id="submitBtn">送出回報</button>
         <span class="status" id="status" role="status" aria-live="polite"></span>
       </div>
       <div class="fallback" id="fallback" hidden>
-        <p class="small muted">這個預覽版目前只開放受邀的人直接送出。你可以複製下面的文字，私訊給我們的 IG，我們會幫你匿名登錄。</p>
+        <p class="small muted">目前沒辦法直接送出。你可以複製下面的文字，私訊 IG <a href="https://www.instagram.com/wadaciwahuibaodesu/" target="_blank" rel="noopener">@Wadaciwahuibaodesu</a>，我會幫你匿名登錄。</p>
         <textarea id="fallbackText" readonly aria-label="回報內容"></textarea>
         <div class="actions"><button type="button" class="ghost" id="copyReport">複製文字</button><span class="status" id="copyReportStatus" role="status" aria-live="polite"></span></div>
       </div>
@@ -704,11 +962,6 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
       <div class="kpi"><span class="v" id="k-n">0</span><span class="k">筆回報</span></div>
       <div class="kpi"><span class="v" id="k-dev">—</span><span class="k">自費醫材中位數</span></div>
       <div class="kpi"><span class="v" id="k-ward">—</span><span class="k">病房差額中位數</span></div>
-    </div>
-    <div class="owner" id="ownerPanel" hidden>
-      <h3>待審核的留言（只有你看得到）</h3>
-      <p class="small muted">按「公開」後，這段話會出現在時間軸對應的階段。含有姓名、醫師、醫院評價或不適合的內容，請按「不公開」。</p>
-      <ul class="pending" id="pendingList"></ul>
     </div>
     <div id="statsBody">
       <div class="empty"><h3>還沒有回報</h3><p>第一筆回報送出後，這裡會依移植物種類和醫院整理出來。</p></div>
@@ -799,64 +1052,6 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     <p class="small muted">自費物理治療每次大概金額，可以看「大家的數字」，資料來自匿名費用回報。</p>
   </section>
 
-  <section id="gifts">
-    <h2>免費轉送</h2>
-    <p>術後用過、現在用不到的東西，送給剛開完刀的人。這裡只開放免費贈送，不能標價販售。</p>
-
-    <div class="safety">
-      <h3>交換前請先看</h3>
-      <ul>
-        <li>只限免費贈送。寄送運費由雙方自行溝通。</li>
-        <li>若面交，建議約在公共場合。</li>
-        <li>術後支架要依個人調整角度和尺寸，拿到後請先請物理治療師或醫師確認。</li>
-        <li>本站不檢查物品狀況，也不參與聯絡，請雙方自行協調。</li>
-        <li>刊登 30 天後會自動下架。</li>
-      </ul>
-    </div>
-
-    <div class="filters">
-      <label class="small" for="g-filter-city">縣市</label>
-      <select id="g-filter-city"><option value="">全部縣市</option></select>
-      <label class="small" for="g-filter-cat">類別</label>
-      <select id="g-filter-cat"><option value="">全部類別</option></select>
-    </div>
-
-    <ul class="gifts" id="giftList"></ul>
-    <div class="empty" id="giftEmpty"><h3>目前沒有可索取的物品</h3><p>有用不到的東西嗎？在下面刊登，第一個就是你。</p></div>
-
-    <details class="gift-form" id="giftDetails">
-      <summary>我有東西要送</summary>
-      <form id="giftForm" novalidate style="margin-top:12px">
-        <div class="row2">
-          <div class="field"><label for="g-cat">類別 <span class="req">*</span></label><select id="g-cat"></select></div>
-          <div class="field"><label for="g-cond">狀況 <span class="req">*</span></label>
-            <select id="g-cond"><option value="">請選擇</option><option>全新未拆</option><option>幾乎全新</option><option>有使用痕跡，功能正常</option></select>
-          </div>
-        </div>
-        <div class="field"><label for="g-name">物品說明 <span class="req">*</span></label><input id="g-name" type="text" maxlength="60" placeholder="例：術後可調角度支架，左右腳通用"></div>
-        <div class="row2">
-          <div class="field"><label for="g-size">尺寸（選填）</label><input id="g-size" type="text" maxlength="30" placeholder="例：M、大腿圍 45–55 cm"></div>
-          <div class="field"><label for="g-city">所在縣市 <span class="req">*</span></label><select id="g-city"></select></div>
-        </div>
-        <div class="field">
-          <span class="lab" id="lab-deliver">交付方式 <span class="req">*</span></span>
-          <div class="chips" role="radiogroup" aria-labelledby="lab-deliver">
-            <label class="chip"><input type="radio" name="deliver" value="面交"><span>面交</span></label>
-            <label class="chip"><input type="radio" name="deliver" value="店到店寄送"><span>店到店寄送</span></label>
-            <label class="chip"><input type="radio" name="deliver" value="都可以"><span>都可以</span></label>
-          </div>
-        </div>
-        <div class="field"><label for="g-contact">你的 IG 帳號 <span class="req">*</span></label><input id="g-contact" type="text" maxlength="31" autocapitalize="off" autocomplete="off" spellcheck="false" placeholder="例：@your_ig"></div>
-        <p class="small muted">對方按「我想要」並確認安全提醒後，才會看到你的 IG 帳號，再直接私訊你。請填你願意讓對方看到的帳號。</p>
-        <label class="check"><input type="checkbox" id="g-free"> 我確認這是免費贈送，不會向對方收錢（運費另外講好）。</label>
-        <div class="actions">
-          <button type="submit" id="giftSubmit">刊登</button>
-          <span class="status" id="giftStatus" role="status" aria-live="polite"></span>
-        </div>
-      </form>
-    </details>
-  </section>
-
   <section id="resources">
     <h2>公開資料去哪查</h2>
     <div class="links">
@@ -875,8 +1070,10 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
       <li><a href="https://mohw.gov.tw/cp-16-75851-1.html" target="_blank" rel="noopener">衛生福利部：住院整合照護服務試辦計畫說明（2023）</a><span>用途：整合照護自付金額</span></li>
       <li><span class="src-name">衛生福利部：醫事查詢系統（2026 年 10 月 23 日查詢）</span><span>用途：全台登記的物理治療所名稱與地區</span></li>
       <li><span class="src-name">衛生福利部中央健康保險署：健保特約醫療院所名冊（政府資料開放平臺）</span><span>用途：標示健保特約的物理治療所</span></li>
+      <li><span class="src-name">傷友經驗整理</span><span>用途：問醫生清單、住院包與回家後的準備物品</span></li>
+      <li><a href="https://bjsm.bmj.com/content/52/22/1437.full" target="_blank" rel="noopener">Rambaud 等人（2018），British Journal of Sports Medicine：ACL 重建術後恢復跑步的標準</a><span>用途：開跑評估的方向</span></li>
+      <li><a href="https://pubmed.ncbi.nlm.nih.gov/36731908/" target="_blank" rel="noopener">Kotsifaki 等人（2023），British Journal of Sports Medicine：Aspetar ACL 重建術後復健臨床指引</a><span>用途：開跑評估的方向</span></li>
       <li><a href="https://www.pt.org.tw/clinic" target="_blank" rel="noopener">中華民國物理治療師公會全國聯合會：台灣物理治療所地圖</a><span>用途：物理治療所清單</span></li>
-      <li><a href="https://mohw.gov.tw/cp-16-83571-1.html" target="_blank" rel="noopener">衛生福利部：醫療器材網路販售相關說明</a><span>用途：轉送區只開放免費贈送的依據</span></li>
       <li><span class="src-name">Cheadle, C. J., &amp; Kuzma, C. (2019). Rebound: Train your mind to bounce back stronger from sports injuries. Bloomsbury Sport.</span><span>用途：心情內容與小工具的概念參考</span></li>
       <li><span class="src-name">病友經驗彙整</span><span>用途：整理最常被問的問題，只做匿名彙整，不引用個人發言</span></li>
       <li><span class="src-name">本站匿名費用回報</span><span>用途：「大家的數字」的統計來源</span></li>
@@ -885,6 +1082,14 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   </section>
 
   <footer>
+    <div class="author" id="about">
+      <img class="author-photo" src="data:image/jpeg;base64,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" alt="Hui 的照片" width="80" height="80">
+      <div class="author-text">
+        <h3>關於我</h3>
+        <p>嗨，我是 Hui，一名前十字韌帶斷裂過的大學生。從受傷到恢復的過程中，也經歷了很多困難，因此我結合了現有的公開資源與傷友經驗，期待可以減輕傷友的心理焦慮。</p>
+        <p>歡迎追蹤我的 IG：<a href="https://www.instagram.com/wadaciwahuibaodesu/" target="_blank" rel="noopener">@Wadaciwahuibaodesu</a></p>
+      </div>
+    </div>
     <div class="feedback" id="feedback">
       <h3>發現錯誤，或有想補充的？</h3>
       <p>內容寫錯、資料過期、物理治療所資訊有誤，或有想建議的地方，都歡迎來信告訴我。</p>
@@ -896,11 +1101,22 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   </footer>
 </div>
 
+<dialog class="drawer" id="drawer" aria-labelledby="drawerTitle">
+  <div class="drawer-head">
+    <div class="drawer-titles">
+      <h2 id="drawerTitle"></h2>
+      <p class="drawer-sub" id="drawerSub" hidden></p>
+    </div>
+    <button type="button" class="drawer-close" id="drawerClose">關閉</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</dialog>
+
 <script>
 (function () {
   const CITIES = ["台北市","新北市","基隆市","桃園市","新竹市","新竹縣","苗栗縣","台中市","彰化縣","南投縣","雲林縣","嘉義市","嘉義縣","台南市","高雄市","屏東縣","宜蘭縣","花蓮縣","台東縣","澎湖縣","金門縣","連江縣"];
-  const CATS = ["術後支架","護膝","拐杖","冰敷機／冷療機","彈力帶／訓練用品","其他"];
-  const DAY = 86400000, EXPIRE_DAYS = 30, MIN_N = 3;
+  // 貼上 Google Apps Script 部署後的網址（https://script.google.com/macros/s/.../exec）
+  const SHEET_API = "https://script.google.com/macros/s/AKfycbyEiRr3KNuL41Syr0bGAxQF86VeivBmld0EBje7MrTvdjfsjpksJ2j7kWyMFs-KUL6U/exec";
   const $ = (id) => document.getElementById(id);
   const fillSelect = (sel, items, first) => { if (first !== null) sel.append(new Option(first, "")); items.forEach((v) => sel.append(new Option(v, v))); };
 
@@ -908,12 +1124,6 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   $("f-year").append(new Option("請選擇", ""));
   for (let y = thisYear; y >= thisYear - 15; y--) $("f-year").append(new Option(String(y), String(y)));
   fillSelect($("f-city"), CITIES, "請選擇");
-  fillSelect($("g-city"), CITIES, "請選擇");
-  fillSelect($("g-cat"), CATS, "請選擇");
-  fillSelect($("g-filter-city"), CITIES, null);
-  fillSelect($("g-filter-cat"), CATS, null);
-
-  let db = null, user = null, myId = null, canWrite = null;
 
   function el(tag, attrs, text) {
     const e = document.createElement(tag);
@@ -929,7 +1139,6 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
 
   // ---------------- 費用回報 ----------------
   const form = $("reportForm"), statusEl = $("status"), submitBtn = $("submitBtn");
-  let writeRefused = false;
   const num = (id, max) => {
     const v = $(id).value.trim();
     if (v === "") return null;
@@ -994,29 +1203,28 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     const { r, missing, bad } = collect();
     if (missing.length) return setStatus(statusEl, "還差：" + missing.join("、"), "err");
     if (bad) return setStatus(statusEl, "金額或天數請填 0 以上的整數。", "err");
-    if (!db || canWrite === false || writeRefused) { showFallback(r); return setStatus(statusEl, "請用下方文字回報"); }
+    if (!SHEET_API) { showFallback(r); return setStatus(statusEl, "請用下方文字回報"); }
     submitBtn.disabled = true; setStatus(statusEl, "送出中…");
-    const now = new Date();
     try {
-      await db.collection("reports").add(Object.assign({}, r, { submitted: now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0"), v: 1 }));
+      const res = await fetch(SHEET_API, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(Object.assign({}, r, { website: $("f-website").value })),
+      });
+      const out = await res.json();
+      if (!out || !out.ok) throw new Error((out && out.error) || "failed");
       setStatus(statusEl, "收到了，謝謝你幫下一個人。", "ok");
       form.reset(); $("fallback").hidden = true;
+      setTimeout(loadStats, 1500);
     } catch (err) {
-      const code = err && err.code;
-      if (code === "invalid_argument" || code === "not_granted" || code === "quota_exceeded") {
-        writeRefused = true; showFallback(r); setStatus(statusEl, "目前無法直接送出，請改用下方文字回報。", "err");
-      } else setStatus(statusEl, "連線不太穩，請稍後再按一次。", "err");
+      showFallback(r);
+      setStatus(statusEl, String(err && err.message) === "busy" ? "現在送出的人有點多，請稍後再試，或改用下方文字回報。" : "沒有送出成功，請稍後再試，或改用下方文字回報。", "err");
     } finally { submitBtn.disabled = false; }
   });
 
-  // ---------------- 統計 ----------------
-  const median = (arr) => {
-    const a = arr.filter((v) => typeof v === "number" && Number.isFinite(v)).sort((x, y) => x - y);
-    if (!a.length) return null;
-    const m = Math.floor(a.length / 2);
-    return a.length % 2 ? a[m] : Math.round((a[m - 1] + a[m]) / 2);
-  };
-  const money = (v) => (v === null ? "—" : "$" + v.toLocaleString("zh-TW"));
+  // ---------------- 統計（由試算表計算，網站只拿到結果） ----------------
+  const money = (v) => (v === null || v === undefined ? "—" : "$" + Number(v).toLocaleString("zh-TW"));
+  const OTHER_LABEL = { anesCost: "麻醉、止痛自費", carerCost: "看護費用", braceCost: "支架／護具", ptCost: "自費物治（每次）" };
   function table(headers, rows) {
     const box = el("div", { class: "tablebox" }), t = el("table"), thead = el("thead"), tr = el("tr");
     headers.forEach(([h, n]) => tr.append(el("th", n ? { class: "n" } : null, h)));
@@ -1025,185 +1233,39 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     rows.forEach((cells) => { const r = el("tr"); cells.forEach(([v, n]) => r.append(el("td", n ? { class: "n" } : null, v))); tb.append(r); });
     t.append(tb); box.append(t); return box;
   }
-  function renderStats(reports) {
-    $("k-n").textContent = reports.length;
-    $("k-dev").textContent = reports.length >= MIN_N ? money(median(reports.map((r) => r.deviceCost))) : "—";
-    $("k-ward").textContent = reports.length >= MIN_N ? money(median(reports.map((r) => r.wardCost))) : "—";
+  function renderStats(d) {
+    const n = (d && d.n) || 0;
+    $("k-n").textContent = n;
+    $("k-dev").textContent = money(d && d.overall && d.overall.deviceCost);
+    $("k-ward").textContent = money(d && d.overall && d.overall.wardCost);
     const body = $("statsBody"); body.replaceChildren();
-    if (!reports.length) {
+    if (!n) {
       const e = el("div", { class: "empty" });
       e.append(el("h3", null, "還沒有回報"), el("p", null, "第一筆回報送出後，這裡會依移植物種類和醫院整理出來。"));
       return body.append(e);
     }
     const wrap = el("div"); wrap.style.cssText = "display:grid;gap:14px";
-    const byGraft = {};
-    reports.forEach((r) => { (byGraft[r.graft || "不確定"] ||= []).push(r); });
     wrap.append(el("h3", null, "依移植物種類"), table([["移植物"], ["回報數", true], ["自費醫材中位數", true]],
-      Object.entries(byGraft).sort((a, b) => b[1].length - a[1].length).map(([g, rs]) => [[g], [String(rs.length), true], [rs.length >= MIN_N ? money(median(rs.map((r) => r.deviceCost))) : "累積中", true]])));
-    const other = [["麻醉、止痛自費", "anesCost"], ["看護費用", "carerCost"], ["支架／護具", "braceCost"], ["自費物治（每次）", "ptCost"]].map(([label, key]) => {
-      const vals = reports.map((r) => r[key]).filter((v) => typeof v === "number");
-      return [[label], [String(vals.length), true], [vals.length >= MIN_N ? money(median(vals)) : "累積中", true]];
-    });
-    wrap.append(el("h3", null, "其他常見花費"), table([["項目"], ["回報數", true], ["中位數", true]], other));
-    const byHosp = {};
-    reports.forEach((r) => { if (r.hospital) (byHosp[r.hospital + "｜" + r.city] ||= []).push(r); });
-    const hRows = Object.entries(byHosp).filter(([, rs]) => rs.length >= MIN_N).sort((a, b) => b[1].length - a[1].length).map(([k, rs]) => {
-      const [h, c] = k.split("｜"); const d = median(rs.map((r) => r.days));
-      return [[h], [c], [String(rs.length), true], [money(median(rs.map((r) => r.deviceCost))), true], [money(median(rs.map((r) => r.wardCost))), true], [d === null ? "—" : d + " 天", true]];
-    });
+      (d.byGraft || []).map((g) => [[g.graft], [String(g.n), true], [g.deviceCost === null ? "累積中" : money(g.deviceCost), true]])));
+    wrap.append(el("h3", null, "其他常見花費"), table([["項目"], ["回報數", true], ["中位數", true]],
+      (d.other || []).map((o) => [[OTHER_LABEL[o.key] || o.key], [String(o.n), true], [o.median === null ? "累積中" : money(o.median), true]])));
     wrap.append(el("h3", null, "依醫院"));
-    if (hRows.length) wrap.append(table([["醫院"], ["縣市"], ["回報數", true], ["自費醫材", true], ["病房差額", true], ["住院", true]], hRows));
-    else { const p = Object.keys(byHosp).length; wrap.append(el("p", { class: "small muted" }, p ? "已有 " + p + " 間醫院收到回報，但都還不到 3 筆，先不公開。" : "還沒有人填醫院名稱。")); }
+    const hs = d.byHosp || [];
+    if (hs.length) wrap.append(table([["醫院"], ["縣市"], ["回報數", true], ["自費醫材", true], ["病房差額", true], ["住院", true]],
+      hs.map((h) => [[h.hospital], [h.city], [String(h.n), true], [money(h.deviceCost), true], [money(h.wardCost), true], [h.days === null ? "—" : h.days + " 天", true]])));
+    else wrap.append(el("p", { class: "small muted" }, d.hospitalsWaiting ? "已有 " + d.hospitalsWaiting + " 間醫院收到回報，但都還不到 3 筆，先不公開。" : "還沒有人填醫院名稱。"));
     body.append(wrap);
   }
-
-  // ---------------- 免費轉送 ----------------
-  // 每位刊登者一份文件：gifts/<自己的 id> = { items: [...] }，只有本人能改。
-  let giftDocs = []; // [{ownerId, items}]
-  const revealed = new Set();
-  const giftForm = $("giftForm"), giftStatus = $("giftStatus"), giftSubmit = $("giftSubmit");
-  const fmtDate = (ms) => { const d = new Date(ms); return (d.getMonth() + 1) + "/" + d.getDate(); };
-
-  function renderGifts() {
-    const fCity = $("g-filter-city").value, fCat = $("g-filter-cat").value;
-    const now = Date.now(), list = $("giftList");
-    list.replaceChildren();
-    const all = [];
-    giftDocs.forEach((d) => (d.items || []).forEach((it) => all.push(Object.assign({ ownerId: d.ownerId }, it))));
-    const visible = all.filter((it) => {
-      const mine = myId && it.ownerId === myId;
-      const expired = now - (it.postedAt || 0) > EXPIRE_DAYS * DAY;
-      if (!mine && (it.status === "given" || expired)) return false;
-      if (fCity && it.city !== fCity) return false;
-      if (fCat && it.category !== fCat) return false;
-      return true;
-    }).sort((a, b) => (b.postedAt || 0) - (a.postedAt || 0));
-
-    $("giftEmpty").hidden = visible.length > 0;
-    visible.forEach((it) => {
-      const mine = myId && it.ownerId === myId;
-      const expired = now - (it.postedAt || 0) > EXPIRE_DAYS * DAY;
-      const li = el("li", { class: "gift" + (it.status === "given" || expired ? " done" : "") });
-      const top = el("div", { class: "top" });
-      top.append(el("h3", null, it.name || it.category));
-      const badges = el("div", { class: "actions" });
-      badges.append(el("span", { class: "badge" }, it.category));
-      if (mine) badges.append(el("span", { class: "badge" }, it.status === "given" ? "已送出" : expired ? "已過期" : "你的刊登"));
-      top.append(badges);
-      li.append(top);
-      const meta = [it.condition, it.size ? "尺寸 " + it.size : "", it.city, it.deliver, fmtDate(it.postedAt) + " 刊登"].filter(Boolean).join(" · ");
-      li.append(el("p", { class: "meta" }, meta));
-
-      if (mine) {
-        const row = el("div", { class: "actions" });
-        if (it.status !== "given" && !expired) {
-          const b = el("button", { type: "button", class: "ghost" }, "標示為已送出");
-          b.addEventListener("click", () => editMine(it.id, (x) => Object.assign(x, { status: "given" }), "已標示為送出"));
-          row.append(b);
-        }
-        if (expired && it.status !== "given") {
-          const b = el("button", { type: "button", class: "ghost" }, "重新上架 30 天");
-          b.addEventListener("click", () => editMine(it.id, (x) => Object.assign(x, { postedAt: Date.now() }), "已重新上架"));
-          row.append(b);
-        }
-        const del = el("button", { type: "button", class: "link" }, "刪除這則刊登");
-        del.addEventListener("click", () => {
-          if (del.dataset.armed) return editMine(it.id, () => null, "已刪除");
-          del.dataset.armed = "1"; del.textContent = "再按一次確認刪除";
-        });
-        row.append(del);
-        li.append(row);
-      } else if (revealed.has(it.id)) {
-        const box = el("div", { class: "reveal" });
-        box.append(el("p", { class: "small muted" }, "請到 IG 私訊對方。本站不參與後續聯絡，也無法替物品狀況把關。"));
-        const c = el("p", { class: "contact" }, (it.contactType === "IG" || !it.contactType ? "IG " : it.contactType + "：") + (it.contact || ""));
-        box.append(c);
-        const row = el("div", { class: "actions" });
-        const handle = (it.contact || "").replace(/^@/, "");
-        if ((it.contactType === "IG" || !it.contactType) && /^[A-Za-z0-9._]{1,30}$/.test(handle)) {
-          row.append(el("a", { href: "https://www.instagram.com/" + handle + "/", target: "_blank", rel: "noopener" }, "打開對方的 IG"));
-        }
-        const cb = el("button", { type: "button", class: "ghost" }, "複製帳號");
-        const st = el("span", { class: "status", role: "status" });
-        cb.addEventListener("click", () => copy(it.contact || "", null, st));
-        row.append(cb, st); box.append(row);
-        li.append(box);
-      } else {
-        const want = el("button", { type: "button" }, "我想要");
-        const confirmBox = el("div", { class: "reveal" }); confirmBox.hidden = true;
-        const lab = el("label", { class: "check" });
-        const chk = el("input", { type: "checkbox" });
-        lab.append(chk, document.createTextNode("我看過上面的「交換前請先看」，會約在安全的地方，拿到支架會先請專業人員確認。"));
-        const go = el("button", { type: "button" }, "顯示對方的 IG"); go.disabled = true;
-        chk.addEventListener("change", () => { go.disabled = !chk.checked; });
-        go.addEventListener("click", () => { revealed.add(it.id); renderGifts(); });
-        confirmBox.append(lab, go);
-        want.addEventListener("click", () => { want.hidden = true; confirmBox.hidden = false; chk.focus(); });
-        const row = el("div", { class: "actions" }); row.append(want);
-        li.append(row, confirmBox);
-      }
-      list.append(li);
-    });
-  }
-  $("g-filter-city").addEventListener("change", renderGifts);
-  $("g-filter-cat").addEventListener("change", renderGifts);
-
-  let giftBusy = false;
-  async function editMine(itemId, fn, okText) {
-    if (!db || !myId || giftBusy) return;
-    giftBusy = true;
+  async function loadStats() {
+    if (!SHEET_API) return;
     try {
-      const ref = db.doc("gifts/" + myId);
-      const snap = await ref.get();
-      const items = ((snap.exists && snap.data().items) || []).map((x) => Object.assign({}, x));
-      const next = items.map((x) => (x.id === itemId ? fn(x) : x)).filter(Boolean);
-      await ref.set({ items: next });
-      setStatus(giftStatus, okText, "ok");
-    } catch (e) { setStatus(giftStatus, "沒有更新成功，請稍後再試。", "err"); }
-    finally { giftBusy = false; }
+      const res = await fetch(SHEET_API, { cache: "no-store" });
+      const d = await res.json();
+      renderStats(d);
+      wallDocs = (d.wall || []).map((w) => ({ id: String(w.id), text: String(w.text || ""), stage: w.stage || "" }));
+      renderWall();
+    } catch (e) { /* 讀不到就維持原本的畫面 */ }
   }
-
-  giftForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const it = {
-      category: $("g-cat").value, condition: $("g-cond").value,
-      name: $("g-name").value.trim().slice(0, 60), size: $("g-size").value.trim().slice(0, 30),
-      city: $("g-city").value,
-      deliver: (giftForm.querySelector('input[name="deliver"]:checked') || {}).value || "",
-      contactType: "IG", contact: $("g-contact").value.trim().replace(/^@+/, ""),
-    };
-    if (it.contact) it.contact = "@" + it.contact;
-    const missing = [];
-    if (!it.category) missing.push("類別");
-    if (!it.condition) missing.push("狀況");
-    if (!it.name) missing.push("物品說明");
-    if (!it.city) missing.push("縣市");
-    if (!it.deliver) missing.push("交付方式");
-    if (!it.contact) missing.push("IG 帳號");
-    if (missing.length) return setStatus(giftStatus, "還差：" + missing.join("、"), "err");
-    if (!/^@[A-Za-z0-9._]{1,30}$/.test(it.contact)) return setStatus(giftStatus, "IG 帳號只能有英文、數字、底線和句點。", "err");
-    if (!$("g-free").checked) return setStatus(giftStatus, "請勾選確認這是免費贈送。", "err");
-    if (/\$|元|塊|售|賣|價/.test(it.name + it.size)) return setStatus(giftStatus, "這裡只開放免費贈送，說明裡請不要寫價格。", "err");
-    if (!db || !myId || canWrite === false) return setStatus(giftStatus, "這個預覽版目前只開放受邀的人刊登。", "err");
-    if (giftBusy) return;
-    giftBusy = true; giftSubmit.disabled = true; setStatus(giftStatus, "刊登中…");
-    try {
-      const ref = db.doc("gifts/" + myId);
-      const snap = await ref.get();
-      const items = ((snap.exists && snap.data().items) || []).map((x) => Object.assign({}, x));
-      if (items.filter((x) => x.status !== "given").length >= 10) throw { code: "too_many" };
-      items.push(Object.assign(it, { id: "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), postedAt: Date.now(), status: "open" }));
-      await ref.set({ items });
-      setStatus(giftStatus, "刊登好了，謝謝你。送出後記得回來按「標示為已送出」。", "ok");
-      giftForm.reset();
-    } catch (err) {
-      if (err && err.code === "too_many") setStatus(giftStatus, "一個人最多同時刊登 10 件，先把送出的標示起來吧。", "err");
-      else if (err && (err.code === "invalid_argument" || err.code === "not_granted")) setStatus(giftStatus, "這個預覽版目前只開放受邀的人刊登。", "err");
-      else setStatus(giftStatus, "沒有刊登成功，請稍後再試。", "err");
-    } finally { giftBusy = false; giftSubmit.disabled = false; }
-  });
-
-  renderGifts();
 
   // ---------------- 打勾清單（只存在這台裝置） ----------------
   const CK = "acl-map-checks";
@@ -1245,7 +1307,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   });
 
   // ---------------- 傷友留言牆 ----------------
-  let reportDocs = [], wallDocs = [], isOwner = false;
+  let wallDocs = [];
   const STAGE_NAME = { pre: "術前", w0: "術後 0–2 週", w2: "術後 2–6 週", w6: "術後 6–12 週", m3: "術後 3–6 個月", m9: "9 個月以上", "": "都可以" };
   function pick(arr, n) {
     const a = arr.slice();
@@ -1270,31 +1332,6 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
         box.append(more);
       }
       box.hidden = false;
-    });
-  }
-  function renderPending() {
-    const panel = $("ownerPanel");
-    if (!isOwner) { panel.hidden = true; return; }
-    const decided = new Set(wallDocs.map((w) => w.id));
-    const pend = reportDocs.filter((x) => x.r && x.r.note && x.r.noteConsent && !decided.has(x.id));
-    const list = $("pendingList"); list.replaceChildren();
-    panel.hidden = false;
-    if (!pend.length) { list.append(el("li", { class: "small muted" }, "目前沒有待審核的留言。")); return; }
-    pend.forEach((x) => {
-      const li = el("li");
-      li.append(el("blockquote", null, x.r.note), el("p", { class: "small muted" }, "想送給：" + (STAGE_NAME[x.r.noteStage || ""] || "都可以")));
-      const row = el("div", { class: "actions" });
-      const ok = el("button", { type: "button" }, "公開");
-      const no = el("button", { type: "button", class: "ghost" }, "不公開");
-      const st = el("span", { class: "status", role: "status" });
-      const decide = async (hidden) => {
-        ok.disabled = no.disabled = true;
-        try { await db.doc("wall/" + x.id).set({ text: hidden ? "" : x.r.note, stage: x.r.noteStage || "", hidden, decidedAt: Date.now() }); }
-        catch (e) { setStatus(st, "沒有成功，請再試一次。", "err"); ok.disabled = no.disabled = false; }
-      };
-      ok.addEventListener("click", () => decide(false));
-      no.addEventListener("click", () => decide(true));
-      row.append(ok, no, st); li.append(row); list.append(li);
     });
   }
 
@@ -1380,11 +1417,26 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   renderFear();
 
   // ---------------- 跳到我的階段 ----------------
+  let fadeTimer = null;
   function openStage(id) {
     const li = document.getElementById(id);
     if (!li || !li.classList.contains("phase")) return;
+    document.querySelectorAll(".phase.lit").forEach((p) => { if (p !== li) p.classList.remove("lit"); });
     li.querySelectorAll("details").forEach((d) => { d.open = true; });
-    li.classList.remove("flash"); void li.offsetWidth; li.classList.add("flash");
+    // 一點下去就是最深的顏色，畫面停好後再慢慢淡掉
+    li.classList.add("lit");
+    let done = false;
+    const fade = () => {
+      if (done) return; done = true;
+      clearTimeout(fadeTimer);
+      window.removeEventListener("scrollend", fade);
+      fadeTimer = setTimeout(() => li.classList.remove("lit"), 300);
+    };
+    if ("onscrollend" in window) window.addEventListener("scrollend", fade, { once: true });
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(fade, 900);
+    const y0 = window.scrollY;
+    setTimeout(() => { if (Math.abs(window.scrollY - y0) < 2) fade(); }, 150);
   }
   document.querySelectorAll(".stage-links a").forEach((a) => {
     a.addEventListener("click", () => openStage(a.getAttribute("href").slice(1)));
@@ -1460,6 +1512,110 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     try { navigator.clipboard.writeText(addr).then(() => setStatus($("mailStatus"), "已複製", "ok"), fallback); } catch (e) { fallback(); }
   });
 
+  // ---------------- 查看全部：側邊欄 ----------------
+  (function () {
+    const dlg = $("drawer"), body = $("drawerBody"), title = $("drawerTitle"), sub = $("drawerSub");
+    if (!dlg) return;
+    let current = null, home = null, opener = null;
+
+    // 側邊欄裡的打勾清單（跟其他清單一樣，只存在這台裝置）
+    document.querySelectorAll(".drawer-src ul.check").forEach((ul) => {
+      const key = ul.dataset.key;
+      ul.classList.add("checklist");
+      [...ul.children].forEach((li, i) => {
+        const k = key + ":" + i;
+        const after = [...li.querySelectorAll(".after")];
+        after.forEach((n) => n.remove());
+        const label = el("label");
+        const box = el("input", { type: "checkbox", id: "ck-" + key + "-" + i });
+        box.checked = !!checks[k];
+        const span = el("span");
+        while (li.firstChild) span.append(li.firstChild);
+        label.append(box, span);
+        li.append(label);
+        after.forEach((n) => li.append(n));
+        box.addEventListener("change", () => { if (box.checked) checks[k] = 1; else delete checks[k]; saveChecks(); refresh(); });
+      });
+    });
+
+    function stats(src) {
+      const boxes = [...src.querySelectorAll('input[type="checkbox"]')];
+      return { n: boxes.length, done: boxes.filter((b) => b.checked).length };
+    }
+    function refresh() {
+      document.querySelectorAll(".card[data-src]").forEach((card) => {
+        const src = $(card.dataset.src), c = card.querySelector(".card-count");
+        if (!src || !c) return;
+        const st = stats(src);
+        c.textContent = st.n ? "已勾 " + st.done + " / " + st.n + " 項" : "";
+      });
+      if (current) {
+        const st = stats(current);
+        sub.hidden = !st.n;
+        sub.textContent = st.n ? "已完成 " + st.done + " / " + st.n + " 項，勾選只存在這台手機的這個瀏覽器裡" : "";
+      }
+    }
+
+    // 卡片上預覽前三項
+    document.querySelectorAll(".card[data-src]").forEach((card) => {
+      const peek = card.querySelector(".card-peek"), src = $(card.dataset.src);
+      if (!peek || !src) return;
+      [...src.querySelectorAll("ul.check > li")].slice(0, 3).forEach((li) => {
+        const sp = li.querySelector("label > span");
+        peek.append(el("li", null, (sp || li).textContent.trim()));
+      });
+    });
+
+    function putBack() {
+      if (current && home) { current.hidden = true; home.parent.insertBefore(current, home.next); }
+      current = null; home = null;
+    }
+    function open(id, btn) {
+      const src = $(id);
+      if (!src) return;
+      putBack();
+      home = { parent: src.parentNode, next: src.nextSibling };
+      current = src;
+      title.textContent = src.dataset.title || "";
+      src.hidden = false;
+      body.replaceChildren(src);
+      body.scrollTop = 0;
+      if (!dlg.open) {
+        opener = btn;
+        if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+      }
+      refresh();
+    }
+    function onClose() {
+      putBack();
+      if (opener) { try { opener.focus({ preventScroll: true }); } catch (e) {} }
+      opener = null;
+    }
+    function close() {
+      if (typeof dlg.close === "function" && dlg.open) dlg.close();
+      else { dlg.removeAttribute("open"); onClose(); }
+    }
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-open]");
+      if (!b) return;
+      e.preventDefault();
+      open(b.dataset.open, b);
+    });
+    dlg.addEventListener("close", onClose);
+    $("drawerClose").addEventListener("click", close);
+    dlg.addEventListener("click", (e) => { if (e.target === dlg) close(); });
+    body.addEventListener("click", (e) => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      e.preventDefault();
+      const target = document.getElementById(a.getAttribute("href").slice(1));
+      opener = null;
+      close();
+      if (target) target.scrollIntoView({ block: "start" });
+    });
+    refresh();
+  })();
+
   // ---------------- 導覽列：目前所在的區塊會亮起來 ----------------
   (function () {
     const nav = document.querySelector("nav");
@@ -1489,29 +1645,8 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     update();
   })();
 
-  // ---------------- 連線 ----------------
-  (async () => {
-    try {
-      if (!window.claude || !window.claude.use) return;
-      db = await window.claude.use("db");
-      user = await window.claude.use("user");
-      if (user) { myId = await user.id(); canWrite = await user.can("data.write"); isOwner = await user.isOwner(); }
-    } catch (e) { db = null; }
-    if (!db) return;
-    db.collection("reports").limit(1000).onSnapshot((snap) => {
-      reportDocs = snap.docs.filter((d) => d.exists).map((d) => ({ id: d.id, r: d.data() }));
-      renderStats(reportDocs.map((x) => x.r));
-      renderPending();
-    }, () => {});
-    db.collection("wall").limit(1000).onSnapshot((snap) => {
-      wallDocs = snap.docs.filter((d) => d.exists).map((d) => Object.assign({ id: d.id }, d.data()));
-      renderWall(); renderPending();
-    }, () => {});
-    db.collection("gifts").limit(1000).onSnapshot((snap) => {
-      giftDocs = snap.docs.map((d) => ({ ownerId: d.id, items: (d.data() || {}).items || [] }));
-      renderGifts();
-    }, () => {});
-  })();
+  // ---------------- 讀取統計與留言 ----------------
+  loadStats();
 })();
 </script>
 </body>
