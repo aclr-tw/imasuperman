@@ -305,6 +305,7 @@ body:has(dialog[open]) { overflow: hidden; }
 .author-text a { font-weight: 700; display: inline-block; overflow-wrap: anywhere; }
 .further { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+input[aria-invalid="true"] { border-color: var(--alert); box-shadow: 0 0 0 2px var(--alert-soft); }
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .progress .bar-fill { transition: none; } }
@@ -899,12 +900,12 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
           <input id="f-devother" type="text" maxlength="60" placeholder="其他自費醫材是什麼？（選填）" hidden>
         </div>
         <div class="row2">
-          <div class="field"><label for="f-devcost">自費醫材、注射總額</label><div class="money"><input id="f-devcost" type="number" inputmode="numeric" min="0" step="1" placeholder="看收據上的金額"></div></div>
-          <div class="field"><label for="f-ward">病房差額總額</label><div class="money"><input id="f-ward" type="number" inputmode="numeric" min="0" step="1" placeholder="住健保房填 0"></div></div>
+          <div class="field"><label for="f-devcost">自費醫材、注射總額</label><div class="money"><input id="f-devcost" type="text" inputmode="numeric" autocomplete="off" placeholder="看收據上的金額"></div></div>
+          <div class="field"><label for="f-ward">病房差額總額</label><div class="money"><input id="f-ward" type="text" inputmode="numeric" autocomplete="off" placeholder="住健保房填 0"></div></div>
         </div>
         <div class="row2">
-          <div class="field"><label for="f-days">住院天數</label><input id="f-days" type="number" inputmode="numeric" min="0" step="1" placeholder="例：3"></div>
-          <div class="field"><label for="f-brace">術後支架／護具花費</label><div class="money"><input id="f-brace" type="number" inputmode="numeric" min="0" step="1" placeholder="沒買填 0"></div></div>
+          <div class="field"><label for="f-days">住院天數</label><input id="f-days" type="text" inputmode="numeric" autocomplete="off" placeholder="例：3"></div>
+          <div class="field"><label for="f-brace">術後支架／護具花費</label><div class="money"><input id="f-brace" type="text" inputmode="numeric" autocomplete="off" placeholder="沒買填 0"></div></div>
         </div>
         <div class="field">
           <span class="lab" id="lab-anes">麻醉、止痛的自費項目（可複選）</span>
@@ -920,18 +921,18 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
           </div>
           <input id="f-anesother" type="text" maxlength="60" placeholder="其他麻醉、止痛項目是什麼？（選填）" hidden>
         </div>
-        <div class="field"><label for="f-anescost">麻醉、止痛自費總額</label><div class="money"><input id="f-anescost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒有填 0"></div></div>
+        <div class="field"><label for="f-anescost">麻醉、止痛自費總額</label><div class="money"><input id="f-anescost" type="text" inputmode="numeric" autocomplete="off" placeholder="沒有填 0"></div></div>
         <div class="row2">
           <div class="field"><label for="f-carer">住院期間誰照顧你</label>
             <select id="f-carer"><option value="">請選擇</option><option>家人朋友</option><option>醫院配合的看護</option><option>健保住院整合照護</option><option>仲介或平台找的看護</option><option>自己</option></select>
           </div>
-          <div class="field"><label for="f-carercost">看護費用總額</label><div class="money"><input id="f-carercost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒請看護填 0"></div></div>
+          <div class="field"><label for="f-carercost">看護費用總額</label><div class="money"><input id="f-carercost" type="text" inputmode="numeric" autocomplete="off" placeholder="沒請看護填 0"></div></div>
         </div>
         <div class="row2">
           <div class="field"><label for="f-pt">術後物理治療</label>
             <select id="f-pt"><option value="">請選擇</option><option>健保復健</option><option>自費物理治療</option><option>兩者都有</option><option>還沒開始</option></select>
           </div>
-          <div class="field"><label for="f-ptcost">自費物治每次費用</label><div class="money"><input id="f-ptcost" type="number" inputmode="numeric" min="0" step="1" placeholder="沒有填 0"></div></div>
+          <div class="field"><label for="f-ptcost">自費物治每次費用</label><div class="money"><input id="f-ptcost" type="text" inputmode="numeric" autocomplete="off" placeholder="沒有填 0"></div></div>
         </div>
         <div class="field"><label for="f-ins">商業保險有理賠嗎？</label>
           <select id="f-ins"><option value="">不想回答</option><option>有</option><option>沒有</option><option>還在申請</option></select>
@@ -1143,15 +1144,29 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
 
   // ---------------- 費用回報 ----------------
   const form = $("reportForm"), statusEl = $("status"), submitBtn = $("submitBtn");
-  const num = (id, max) => {
-    const v = $(id).value.trim();
-    if (v === "") return null;
-    const n = Math.round(Number(v));
-    return Number.isFinite(n) && n >= 0 && n <= max ? n : NaN;
+  // 數字欄位：可以打逗號、全形數字或「元」，會自動整理；超出範圍會指出是哪一格
+  const NUM_FIELDS = {
+    "f-devcost": ["自費醫材、注射總額", 1000000], "f-ward": ["病房差額總額", 1000000], "f-days": ["住院天數", 60],
+    "f-brace": ["術後支架／護具花費", 200000], "f-anescost": ["麻醉、止痛自費總額", 200000],
+    "f-carercost": ["看護費用總額", 300000], "f-ptcost": ["自費物治每次費用", 20000],
   };
+  let numProblems = [];
+  const num = (id, max) => {
+    const raw = $(id).value;
+    const v = raw.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+      .replace(/[,，\s]/g, "").replace(/^NT\$|^\$|元$|天$/gi, "");
+    if (v === "") return null;
+    const label = NUM_FIELDS[id] ? NUM_FIELDS[id][0] : "數字";
+    if (!/^\d+(\.\d+)?$/.test(v)) { numProblems.push([id, "「" + label + "」只能填數字"]); return NaN; }
+    const n = Math.round(Number(v));
+    if (n > max) { numProblems.push([id, "「" + label + "」最多填到 " + max.toLocaleString("zh-TW") + "，請再確認一次"]); return NaN; }
+    return n;
+  };
+  Object.keys(NUM_FIELDS).forEach((id) => $(id).addEventListener("input", () => $(id).removeAttribute("aria-invalid")));
   const checked = (f, name) => [...f.querySelectorAll('input[name="' + name + '"]:checked')].map((i) => i.value);
 
   function collect() {
+    numProblems = [];
     const r = {
       year: Number($("f-year").value) || null,
       city: $("f-city").value,
@@ -1206,7 +1221,12 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
     e.preventDefault();
     const { r, missing, bad } = collect();
     if (missing.length) return setStatus(statusEl, "還差：" + missing.join("、"), "err");
-    if (bad) return setStatus(statusEl, "金額或天數請填 0 以上的整數。", "err");
+    if (bad) {
+      numProblems.forEach(([id]) => $(id).setAttribute("aria-invalid", "true"));
+      const first = numProblems[0];
+      if (first) { $(first[0]).focus(); }
+      return setStatus(statusEl, numProblems.map((p) => p[1]).join("；") + "。", "err");
+    }
     if (!SHEET_API) { showFallback(r); return setStatus(statusEl, "請用下方文字回報"); }
     submitBtn.disabled = true; setStatus(statusEl, "送出中…");
     try {
