@@ -315,6 +315,33 @@ body:has(dialog[open]) { overflow: hidden; }
 .further { display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 12px; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 input[aria-invalid="true"] { border-color: var(--alert); box-shadow: 0 0 0 2px var(--alert-soft); }
+.stepper { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); padding-top: 6px; scroll-margin-top: 64px; }
+.stepper-track { position: absolute; top: 15px; left: calc(100% / 12); right: calc(100% / 12); height: 4px; border-radius: 2px; background: var(--line); }
+.stepper-fill { height: 100%; width: 0; border-radius: 2px; background: var(--accent); transition: width .5s ease; }
+button.step { position: relative; display: grid; justify-items: center; align-content: start; gap: 6px; background: none; border: 0; padding: 0 0 4px; color: var(--muted); font-weight: 500; cursor: pointer; min-width: 0; }
+button.step:hover { background: none; border: 0; }
+.step .dot { width: 22px; height: 22px; border-radius: 50%; background: var(--bg); border: 3px solid var(--line); transition: background-color .3s, border-color .3s, transform .3s, box-shadow .3s; }
+.step.done .dot { background: var(--accent); border-color: var(--accent); }
+.step.current .dot { border-color: var(--accent); box-shadow: 0 0 0 5px var(--highlight); transform: scale(1.15); }
+.step .lab { display: grid; line-height: 1.25; text-align: center; }
+.step .lab b { font-size: 14px; color: var(--fg); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.step .lab small { font-size: 11px; white-space: nowrap; }
+.step.current .lab b { color: var(--accent-strong); font-weight: var(--display-weight); }
+.timeline.stepped .phase:not(.active) { display: none; }
+.timeline.stepped .phase { border-bottom: 0; grid-template-columns: minmax(0, 1fr); }
+.timeline.stepped .when { display: none; }
+.phase.in-fwd { animation: step-in-fwd .45s ease-out; }
+.phase.in-back { animation: step-in-back .45s ease-out; }
+@keyframes step-in-fwd { from { opacity: 0; transform: translateX(32px); } to { opacity: 1; transform: none; } }
+@keyframes step-in-back { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: none; } }
+.step-nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; }
+.step-nav button { min-width: 0; }
+.step-nav .is-hidden { visibility: hidden; }
+#stepNext { margin-left: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .stepper-fill, .step .dot { transition: none; }
+  .phase.in-fwd, .phase.in-back { animation: none; }
+}
 footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 @media (prefers-reduced-motion: reduce) { .progress .bar-fill { transition: none; } }
@@ -378,6 +405,7 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
         <p class="small muted">如果你的進度和這裡寫的不一樣，請以你的醫師交代為準；擔心的話，就在回診時問。</p>
       </details>
     </div>
+    <div class="stepper" id="stepper" hidden></div>
     <ol class="timeline">
       <li class="phase" id="stage-pre">
         <div class="when">術前</div>
@@ -534,6 +562,10 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
         </div>
       </li>
     </ol>
+    <div class="step-nav" id="stepNav" hidden>
+      <button type="button" class="ghost" id="stepPrev"></button>
+      <button type="button" id="stepNext"></button>
+    </div>
     <p class="small muted helpline">如果低落或焦慮持續好幾週，影響到睡眠、吃飯或上課上班，請找身心科醫師或心理師聊聊。</p>
   </section>
 
@@ -1013,6 +1045,14 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
         <li>回診、打針這類後續門診費用，有些保單也能申請，記得要留收據。</li>
       </ul>
     </div>
+
+    <div class="block">
+      <h3>容易漏掉的保險</h3>
+      <ul>
+        <li>問問公司人資，公司有沒有幫員工保團體保險。團險裡的醫療險或意外險，也可能可以理賠。</li>
+        <li>車禍受傷的話，除了強制險，也看看任意險有沒有加保「駕駛人傷害險」或「乘客體傷責任險」。能不能申請，要看受傷的人當時是駕駛還是乘客。</li>
+      </ul>
+    </div>
   </section>
 
   <section id="pt">
@@ -1450,11 +1490,75 @@ footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line);
   });
   renderFear();
 
+  // ---------------- 術後時間軸：一次看一個階段，按「下一階段」往前走 ----------------
+  const STEP_LABELS = [["術前", ""], ["0–2", "週"], ["2–6", "週"], ["6–12", "週"], ["3–6", "個月"], ["9", "個月以上"]];
+  const STEP_NAMES = ["術前", "術後 0–2 週", "術後 2–6 週", "術後 6–12 週", "術後 3–6 個月", "9 個月以上"];
+  const tl = document.querySelector("ol.timeline");
+  const phases = tl ? [...tl.children].filter((li) => li.classList.contains("phase")) : [];
+  const stepper = $("stepper"), stepNav = $("stepNav"), stepPrev = $("stepPrev"), stepNext = $("stepNext");
+  const STAGE_KEY = "acl-map-stage";
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let stepIdx = 0, stepBtns = [], stepFill = null;
+  function setStage(i, dir) {
+    if (!phases.length) return;
+    i = Math.max(0, Math.min(phases.length - 1, i));
+    phases.forEach((p, k) => p.classList.toggle("active", k === i));
+    const li = phases[i];
+    li.classList.remove("in-fwd", "in-back");
+    if (dir) { void li.offsetWidth; li.classList.add(dir === "back" ? "in-back" : "in-fwd"); }
+    stepBtns.forEach((b, k) => {
+      b.classList.toggle("done", k < i);
+      b.classList.toggle("current", k === i);
+      if (k === i) b.setAttribute("aria-current", "step"); else b.removeAttribute("aria-current");
+    });
+    if (stepFill) stepFill.style.width = (phases.length > 1 ? (i / (phases.length - 1)) * 100 : 0) + "%";
+    stepPrev.classList.toggle("is-hidden", i === 0);
+    stepPrev.textContent = i > 0 ? "← " + STEP_NAMES[i - 1] : "";
+    stepNext.textContent = i < phases.length - 1 ? "下一階段：" + STEP_NAMES[i + 1] + " →" : "回到術前";
+    stepIdx = i;
+    try { localStorage.setItem(STAGE_KEY, String(i)); } catch (e) {}
+  }
+  function showStepper() {
+    const r = stepper.getBoundingClientRect();
+    if (r.top < 56 || r.top > window.innerHeight * 0.5) stepper.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
+  }
+  if (tl && phases.length === STEP_NAMES.length) {
+    const track = el("div", { class: "stepper-track" });
+    stepFill = el("div", { class: "stepper-fill" });
+    track.append(stepFill);
+    stepper.append(track);
+    stepper.setAttribute("role", "group");
+    stepper.setAttribute("aria-label", "術後階段");
+    stepBtns = STEP_LABELS.map(([top, unit], k) => {
+      const b = el("button", { type: "button", class: "step", "aria-label": STEP_NAMES[k] });
+      const lab = el("span", { class: "lab" });
+      lab.append(el("b", null, top));
+      if (unit) lab.append(el("small", null, unit));
+      b.append(el("span", { class: "dot", "aria-hidden": "true" }), lab);
+      b.addEventListener("click", () => { if (k !== stepIdx) setStage(k, k > stepIdx ? "fwd" : "back"); });
+      stepper.append(b);
+      return b;
+    });
+    stepPrev.addEventListener("click", () => { setStage(stepIdx - 1, "back"); showStepper(); });
+    stepNext.addEventListener("click", () => {
+      if (stepIdx < phases.length - 1) setStage(stepIdx + 1, "fwd"); else setStage(0, "back");
+      showStepper();
+    });
+    tl.classList.add("stepped");
+    stepper.hidden = false;
+    stepNav.hidden = false;
+    let saved = 0;
+    try { saved = Number(localStorage.getItem(STAGE_KEY)) || 0; } catch (e) {}
+    setStage(saved);
+  }
+
   // ---------------- 跳到我的階段 ----------------
   let fadeTimer = null;
   function openStage(id) {
     const li = document.getElementById(id);
     if (!li || !li.classList.contains("phase")) return;
+    const k = phases.indexOf(li);
+    if (k >= 0 && k !== stepIdx) setStage(k, k > stepIdx ? "fwd" : "back");
     document.querySelectorAll(".phase.lit").forEach((p) => { if (p !== li) p.classList.remove("lit"); });
     li.querySelectorAll("details").forEach((d) => { d.open = true; });
     // 一點下去就是最深的顏色，畫面停好後再慢慢淡掉
